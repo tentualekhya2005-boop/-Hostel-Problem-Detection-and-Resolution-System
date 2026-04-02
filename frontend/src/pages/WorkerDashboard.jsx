@@ -15,7 +15,7 @@ const WorkerDashboard = () => {
 
   const fetchTasks = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/complaints/worker', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/worker`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setTasks(data);
@@ -38,7 +38,7 @@ const WorkerDashboard = () => {
         formData.append('image', resolveImages[id]);
       }
 
-      await axios.put(`http://localhost:5000/api/complaints/${id}/resolve`, formData, {
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}/resolve`, formData, {
         headers: { 
           Authorization: `Bearer ${user.token}`
         }
@@ -51,7 +51,7 @@ const WorkerDashboard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to remove this solved task from your dashboard?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/complaints/worker/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/worker/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Task removed from dashboard');
@@ -84,7 +84,7 @@ const WorkerDashboard = () => {
                 
                 {task.imageUrl && (
                   <div style={{ marginBottom: '1rem' }}>
-                    <a href={`http://localhost:5000${task.imageUrl}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>View Student's Attached Image</a>
+                    <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${task.imageUrl}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>View Student's Attached Image</a>
                   </div>
                 )}
 
@@ -92,7 +92,7 @@ const WorkerDashboard = () => {
                   <div style={{ marginBottom: '1rem' }}>
                     <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Your Resolution Photo:</strong>
                     <img 
-                      src={`http://localhost:5000${task.resolvedImageUrl}`} 
+                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${task.resolvedImageUrl}`} 
                       alt="Resolved" 
                       style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
                     />

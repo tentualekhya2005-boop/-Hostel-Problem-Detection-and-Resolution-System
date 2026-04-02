@@ -18,7 +18,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/reset-password', { email, newPassword: password });
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/reset-password`, { email, newPassword: password });
       toast.success(data.message || 'Password updated successfully');
       navigate('/login');
     } catch (error) {

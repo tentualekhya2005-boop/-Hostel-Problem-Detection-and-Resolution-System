@@ -26,7 +26,7 @@ const StudentDashboard = () => {
 
   const fetchAnnouncements = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/announcements', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/announcements`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setAnnouncements(data);
@@ -37,7 +37,7 @@ const StudentDashboard = () => {
 
   const handleDeleteAnnouncement = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/announcements/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/announcements/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Announcement deleted');
@@ -47,7 +47,7 @@ const StudentDashboard = () => {
 
   const fetchTodayMenu = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/menu/today', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/today`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMenu(data);
@@ -58,7 +58,7 @@ const StudentDashboard = () => {
 
   const fetchMyComplaints = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/complaints/student', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/student`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setComplaints(data);
@@ -69,7 +69,7 @@ const StudentDashboard = () => {
 
   const handleVerify = async (id, isResolved) => {
     try {
-      await axios.put(`http://localhost:5000/api/complaints/${id}/verify-resolution`, { isResolved }, {
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}/verify-resolution`, { isResolved }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success(isResolved ? 'Confirmed as resolved!' : 'Sent back to worker!');
@@ -80,7 +80,7 @@ const StudentDashboard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this complaint?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/complaints/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Complaint deleted successfully');
@@ -99,7 +99,7 @@ const StudentDashboard = () => {
     if (image) formData.append('image', image);
 
     try {
-      await axios.post('http://localhost:5000/api/complaints', formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints`, formData, {
         headers: { 
           Authorization: `Bearer ${user.token}`
         }
@@ -236,7 +236,7 @@ const StudentDashboard = () => {
                       <div style={{ marginTop: '0.75rem' }}>
                         <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>📸 Your Original Issue Photo:</strong>
                         <img 
-                          src={`http://localhost:5000${comp.imageUrl}`} 
+                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${comp.imageUrl}`} 
                           alt="Issue" 
                           style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
                         />
@@ -247,7 +247,7 @@ const StudentDashboard = () => {
                       <div style={{ marginTop: '0.75rem' }}>
                         <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Worker's Resolution Photo:</strong>
                         <img 
-                          src={`http://localhost:5000${comp.resolvedImageUrl}`} 
+                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${comp.resolvedImageUrl}`} 
                           alt="Resolution Proof" 
                           style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
                         />

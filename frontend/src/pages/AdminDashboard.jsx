@@ -26,7 +26,7 @@ const AdminDashboard = () => {
 
   const fetchComplaints = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/complaints/all', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/all`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setComplaints(data);
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
 
   const fetchWorkers = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/users/workers', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/workers`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setWorkers(data);
@@ -44,7 +44,7 @@ const AdminDashboard = () => {
 
   const handleAssignWorker = async (complaintId, workerId) => {
     try {
-      await axios.put(`http://localhost:5000/api/complaints/${complaintId}/assign`, { workerId }, {
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${complaintId}/assign`, { workerId }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Worker assigned!');
@@ -54,7 +54,7 @@ const AdminDashboard = () => {
 
   const handleAdminAction = async (id, action) => {
     try {
-      await axios.put(`http://localhost:5000/api/complaints/${id}/admin-resolve`, { action }, {
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}/admin-resolve`, { action }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success(action === 'Resolve' ? 'Complaint finalized and closed!' : 'Re-assigned to worker.');
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
   const handleAdminDelete = async (id) => {
     if (!window.confirm("Are you sure you want to completely delete this complaint from all dashboards?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/complaints/admin/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/admin/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Complaint permanently deleted');
@@ -76,7 +76,7 @@ const AdminDashboard = () => {
   const handleMenuSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/menu', { date: menuDate, ...menu }, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu`, { date: menuDate, ...menu }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Menu updated successfully');
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
   const handleAddWorker = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/users/worker', 
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/worker`, 
         { ...newWorker, skills: newWorker.skills.split(',').map(s=>s.trim()) }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
@@ -100,7 +100,7 @@ const AdminDashboard = () => {
   const handleSendAnnouncement = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/announcements/broadcast', announcement, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/announcements/broadcast`, announcement, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Announcement broadcasted successfully');
@@ -141,8 +141,8 @@ const AdminDashboard = () => {
                     <td style={{ padding: '0.75rem' }}>{c.studentId?.name} ({c.roomNumber})</td>
                     <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
                     <td style={{ padding: '0.75rem' }}>
-                      {c.imageUrl && <div style={{ marginBottom: '0.25rem' }}><a href={`http://localhost:5000${c.imageUrl}`} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--primary)'}}>📸 Issue Photo</a></div>}
-                      {c.resolvedImageUrl && <div><a href={`http://localhost:5000${c.resolvedImageUrl}`} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)'}}>✅ Resolved Photo</a></div>}
+                      {c.imageUrl && <div style={{ marginBottom: '0.25rem' }}><a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${c.imageUrl}`} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--primary)'}}>📸 Issue Photo</a></div>}
+                      {c.resolvedImageUrl && <div><a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${c.resolvedImageUrl}`} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)'}}>✅ Resolved Photo</a></div>}
                     </td>
                     <td style={{ padding: '0.75rem' }}>
                       <span className={`badge badge-${c.status.toLowerCase().replace(/ /g, '-')}`} style={{ textAlign: 'center' }}>{c.status}</span>

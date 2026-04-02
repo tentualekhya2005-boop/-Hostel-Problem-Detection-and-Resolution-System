@@ -12,7 +12,7 @@ const NotificationBell = () => {
 
   const fetchNotifications = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/notifications', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setNotifications(data);
@@ -21,7 +21,7 @@ const NotificationBell = () => {
 
   const fetchUnreadCount = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/notifications/unread-count', {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/unread-count`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setUnreadCount(data.count);
@@ -53,7 +53,7 @@ const NotificationBell = () => {
 
   const handleMarkAllRead = async () => {
     try {
-      await axios.put('http://localhost:5000/api/notifications/mark-all-read', {}, {
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/mark-all-read`, {}, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setUnreadCount(0);
@@ -64,7 +64,7 @@ const NotificationBell = () => {
   const handleDeleteNotification = async (e, notifId) => {
     e.stopPropagation();
     try {
-      await axios.delete(`http://localhost:5000/api/notifications/${notifId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/${notifId}`, {
          headers: { Authorization: `Bearer ${user.token}` }
       });
       setNotifications(prev => prev.filter(n => n._id !== notifId));
