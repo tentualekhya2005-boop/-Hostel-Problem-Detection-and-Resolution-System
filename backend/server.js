@@ -12,9 +12,17 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const fs = require('fs');
+// Create uploads directory if it doesn't exist (needed for cloud deployment)
+const uploadsPath = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+}
+
+app.use('/uploads', express.static(uploadsPath));
+
+
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let globalMongoServer;
