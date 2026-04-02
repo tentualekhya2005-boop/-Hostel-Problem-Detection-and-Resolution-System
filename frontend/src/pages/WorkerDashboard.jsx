@@ -1,0 +1,120 @@
+import { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import { Wrench, CheckCircle } from 'lucide-react';
+
+const WorkerDashboard = () => {
+  const { user } = useContext(AuthContext);
+  const [tasks, setTasks] = useState([]);
+  const [resolveImages, setResolveImages] = useState({});
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5000/api/complaints/worker', {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setTasks(data);
+    } catch (error) { toast.error('Failed to load tasks'); }
+  };
+
+  const handleImageChange = (taskId, file) => {
+    setResolveImages(prev => ({ ...prev, [taskId]: file }));
+  };
+
+  const handleResolve = async (id) => {
+    if (!resolveImages[id]) {
+      toast.error('You must attach a completion photo first!');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      if (resolveImages[id]) {
+        formData.append('image', resolveImages[id]);
+      }
+
+      await axios.put(`http://localhost:5000/api/complaints/${id}/resolve`, formData, {
+        headers: { 
+          Authorization: `Bearer ${user.token}`
+        }
+      });
+      toast.success('Task marked as resolved!');
+      fetchTasks();
+    } catch (error) { toast.error('Failed to resolve task'); }
+  };
+
+  return (
+    <div>
+      <h1 className="page-title">Worker Dashboard</h1>
+      
+      <div className="card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1.25rem' }}>
+          <Wrench size={24} /> My Assigned Tasks
+        </div>
+
+        {tasks.length === 0 ? (
+          <p className="text-muted">You have no assigned tasks right now.</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            {tasks.map(task => (
+              <div key={task._id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span className={`badge badge-${task.status.toLowerCase()}`}>{task.status}</span>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Room: <strong>{task.roomNumber}</strong></span>
+                </div>
+                
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-main)' }}>{task.title}</h3>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', flex: 1, marginBottom: '1rem' }}>{task.description}</p>
+                
+                {task.imageUrl && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <a href={`http://localhost:5000${task.imageUrl}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>View Student's Attached Image</a>
+                  </div>
+                )}
+
+                {task.resolvedImageUrl && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Your Resolution Photo:</strong>
+                    <img 
+                      src={`http://localhost:5000${task.resolvedImageUrl}`} 
+                      alt="Resolved" 
+                      style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
+                    />
+                  </div>
+                )}
+                
+                {task.status === 'Assigned' && (
+                  <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Upload Completion Photo:</label>
+                    <input 
+                      type="file" 
+                      className="form-input" 
+                      accept="image/*" 
+                      onChange={(e) => handleImageChange(task._id, e.target.files[0])}
+                      style={{ padding: '0.5rem', marginBottom: '0.5rem' }}
+                    />
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ width: '100%', gap: '0.5rem', opacity: resolveImages[task._id] ? 1 : 0.5, cursor: resolveImages[task._id] ? 'pointer' : 'not-allowed' }}
+                      disabled={!resolveImages[task._id]}
+                      onClick={() => handleResolve(task._id)}
+                    >
+                      <CheckCircle size={18} /> Mark as Resolved
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default WorkerDashboard;
