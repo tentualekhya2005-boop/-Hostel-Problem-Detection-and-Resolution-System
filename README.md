@@ -2,6 +2,9 @@
 
 A comprehensive MERN stack application designed to manage, track, and resolve hostel-related issues efficiently. It provides dedicated interfaces for Admins, Students, and Staff/Workers, streamlining communication and issue resolution within hostel environments.
 
+## 🎥 Project Demo 
+![Working System Demo](./demo.webp)
+
 ## Project Structure
 ```text
 Hostel System/
@@ -98,7 +101,7 @@ Hostel System/
    ```
 2. Run the server (default runs on `http://localhost:5000`):
    ```bash
-   node index.js 
+   node server.js 
    ```
 
 ### Start Frontend

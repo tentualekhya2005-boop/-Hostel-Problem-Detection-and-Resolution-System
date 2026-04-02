@@ -11,6 +11,7 @@ const complaintSchema = new mongoose.Schema({
     assignedWorkerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     roomNumber: { type: String, required: true },
     isDeletedByStudent: { type: Boolean, default: false },
+    isDeletedByWorker: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Complaint', complaintSchema);

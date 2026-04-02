@@ -22,26 +22,32 @@ let globalMongoServer;
 // Connect to MongoDB
 const connectDB = async () => {
     try {
-        console.log('Starting local MongoDB engine...');
-        const dbPath = path.join(__dirname, 'database_data');
-        if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
+        if (process.env.MONGO_URI && process.env.MONGO_URI.includes('mongodb+srv')) {
+            console.log('Connecting to MongoDB Atlas...');
+            await mongoose.connect(process.env.MONGO_URI);
+            console.log('🚀 CONNECTED TO MONGODB ATLAS CLOUD DATABASE');
+        } else {
+            console.log('Starting local MongoDB engine...');
+            const dbPath = path.join(__dirname, 'database_data');
+            if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
 
-        globalMongoServer = await MongoMemoryServer.create({
-            instance: {
-                port: 27017,
-                dbPath: dbPath,
-                storageEngine: 'wiredTiger'
-            }
-        });
-        
-        const uri = globalMongoServer.getUri() + 'hostel-portal';
-        await mongoose.connect(uri);
-        
-        console.log(`\n======================================================`);
-        console.log(`🚀 CONNECTED TO PERSISTENT DATABASE:`);
-        console.log(`👉 ACTUAL URI: ${uri}`);
-        console.log(`(Your data is now saved permanently in the /database_data folder!)`);
-        console.log(`======================================================\n`);
+            globalMongoServer = await MongoMemoryServer.create({
+                instance: {
+                    port: 27017,
+                    dbPath: dbPath,
+                    storageEngine: 'wiredTiger'
+                }
+            });
+            
+            const uri = globalMongoServer.getUri() + 'hostel-portal';
+            await mongoose.connect(uri);
+            
+            console.log(`\n======================================================`);
+            console.log(`🚀 CONNECTED TO PERSISTENT DATABASE:`);
+            console.log(`👉 ACTUAL URI: ${uri}`);
+            console.log(`(Your data is now saved permanently in the /database_data folder!)`);
+            console.log(`======================================================\n`);
+        }
     } catch (err) {
         console.error('MongoDB connection error:', err);
     }

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Wrench, CheckCircle } from 'lucide-react';
+import { Wrench, CheckCircle, Trash2 } from 'lucide-react';
 
 const WorkerDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -46,6 +46,17 @@ const WorkerDashboard = () => {
       toast.success('Task marked as resolved!');
       fetchTasks();
     } catch (error) { toast.error('Failed to resolve task'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to remove this solved task from your dashboard?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/complaints/worker/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      toast.success('Task removed from dashboard');
+      fetchTasks();
+    } catch (error) { toast.error('Failed to remove task'); }
   };
 
   return (
@@ -105,6 +116,18 @@ const WorkerDashboard = () => {
                       onClick={() => handleResolve(task._id)}
                     >
                       <CheckCircle size={18} /> Mark as Resolved
+                    </button>
+                  </div>
+                )}
+
+                {task.status !== 'Assigned' && (
+                  <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                      onClick={() => handleDelete(task._id)}
+                    >
+                      <Trash2 size={14} /> Delete
                     </button>
                   </div>
                 )}

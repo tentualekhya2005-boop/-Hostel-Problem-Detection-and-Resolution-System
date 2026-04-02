@@ -186,7 +186,7 @@ router.put('/:id/assign', protect, admin, async (req, res) => {
 // @access  Worker
 router.get('/worker', protect, worker, async (req, res) => {
     try {
-        const tasks = await Complaint.find({ assignedWorkerId: req.user._id })
+        const tasks = await Complaint.find({ assignedWorkerId: req.user._id, isDeletedByWorker: false })
             .populate('studentId', 'name roomNumber')
             .sort({ createdAt: -1 });
         res.json(tasks);
@@ -332,6 +332,7 @@ router.put('/:id/admin-resolve', protect, admin, async (req, res) => {
             }
             else if (action === 'Reassign') {
                 complaint.status = 'Assigned';
+                complaint.isDeletedByWorker = false;
                 // Notify worker
                 try {
                     const workerUser = await User.findById(complaint.assignedWorkerId);
@@ -374,6 +375,25 @@ router.delete('/:id', protect, async (req, res) => {
             complaint.isDeletedByStudent = true;
             await complaint.save();
             res.json({ message: 'Complaint hidden for student' });
+        } else {
+            res.status(404).json({ message: 'Complaint not found or unauthorized' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @route   DELETE /api/complaints/worker/:id
+// @desc    Worker soft-deletes a complaint from their dashboard
+// @access  Worker
+router.delete('/worker/:id', protect, worker, async (req, res) => {
+    try {
+        const complaint = await Complaint.findById(req.params.id);
+
+        if (complaint && complaint.assignedWorkerId && complaint.assignedWorkerId.toString() === req.user._id.toString()) {
+            complaint.isDeletedByWorker = true;
+            await complaint.save();
+            res.json({ message: 'Complaint hidden for worker' });
         } else {
             res.status(404).json({ message: 'Complaint not found or unauthorized' });
         }
