@@ -149,7 +149,12 @@ const AdminDashboard = () => {
     if (!input) return;
     try {
       toast.info('Generating PDF Report...', { autoClose: 1000 });
-      const canvas = await html2canvas(input, { scale: 4, useCORS: true });
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.body.classList.contains('dark-theme');
+      const canvas = await html2canvas(input, { 
+        scale: 4, 
+        useCORS: true,
+        backgroundColor: isDark ? '#0f172a' : '#f8fafc' 
+      });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
