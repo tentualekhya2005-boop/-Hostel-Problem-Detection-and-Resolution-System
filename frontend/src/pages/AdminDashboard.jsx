@@ -279,20 +279,36 @@ const AdminDashboard = () => {
           </div>
           <form onSubmit={handleStatsSubmit}>
             <div className="form-group">
-              <label className="form-label">1st Year Students (B.Tech)</label>
-              <input type="number" className="form-input" min="0" value={stats.year1} onChange={(e) => setStats({...stats, year1: Number(e.target.value)})} required />
+              <label className="form-label">1st Year Students (Occupied / Capacity)</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year1} onChange={(e) => setStats({...stats, year1: Number(e.target.value)})} required />
+                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year1Total} onChange={(e) => setStats({...stats, year1Total: Number(e.target.value)})} required />
+              </div>
             </div>
             <div className="form-group">
-              <label className="form-label">2nd Year Students (B.Tech)</label>
-              <input type="number" className="form-input" min="0" value={stats.year2} onChange={(e) => setStats({...stats, year2: Number(e.target.value)})} required />
+              <label className="form-label">2nd Year Students (Occupied / Capacity)</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year2} onChange={(e) => setStats({...stats, year2: Number(e.target.value)})} required />
+                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year2Total} onChange={(e) => setStats({...stats, year2Total: Number(e.target.value)})} required />
+              </div>
             </div>
             <div className="form-group">
-              <label className="form-label">3rd Year Students (B.Tech)</label>
-              <input type="number" className="form-input" min="0" value={stats.year3} onChange={(e) => setStats({...stats, year3: Number(e.target.value)})} required />
+              <label className="form-label">3rd Year Students (Occupied / Capacity)</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year3} onChange={(e) => setStats({...stats, year3: Number(e.target.value)})} required />
+                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year3Total} onChange={(e) => setStats({...stats, year3Total: Number(e.target.value)})} required />
+              </div>
             </div>
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">4th Year Students (B.Tech)</label>
-              <input type="number" className="form-input" min="0" value={stats.year4} onChange={(e) => setStats({...stats, year4: Number(e.target.value)})} required />
+              <label className="form-label">4th Year Students (Occupied / Capacity)</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year4} onChange={(e) => setStats({...stats, year4: Number(e.target.value)})} required />
+                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year4Total} onChange={(e) => setStats({...stats, year4Total: Number(e.target.value)})} required />
+              </div>
             </div>
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Stats</button>
           </form>

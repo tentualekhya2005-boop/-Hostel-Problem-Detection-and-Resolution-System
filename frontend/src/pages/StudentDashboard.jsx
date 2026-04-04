@@ -227,25 +227,25 @@ const StudentDashboard = () => {
 
           {/* Hostel Occupancy Widget */}
           {stats && (
-             <div className="card" style={{ background: 'linear-gradient(135deg, var(--secondary), #be185d)', color: 'white' }}>
+             <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', color: 'white', border: 'none', boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.3)' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem' }}>
                  <BarChart3 size={24} /> B.Tech Students in Hostel
                </div>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
-                   <span>1st Year Students:</span> <strong>{stats.year1}</strong>
+                   <span>1st Year Students:</span> <strong>{stats.year1} out of {stats.year1Total || 0}</strong>
                  </div>
                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
-                   <span>2nd Year Students:</span> <strong>{stats.year2}</strong>
+                   <span>2nd Year Students:</span> <strong>{stats.year2} out of {stats.year2Total || 0}</strong>
                  </div>
                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
-                   <span>3rd Year Students:</span> <strong>{stats.year3}</strong>
+                   <span>3rd Year Students:</span> <strong>{stats.year3} out of {stats.year3Total || 0}</strong>
                  </div>
                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
-                   <span>4th Year Students:</span> <strong>{stats.year4}</strong>
+                   <span>4th Year Students:</span> <strong>{stats.year4} out of {stats.year4Total || 0}</strong>
                  </div>
                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.3)', borderRadius: '0.5rem', marginTop: '0.5rem' }}>
-                   <strong>Total Students:</strong> <strong>{stats.year1 + stats.year2 + stats.year3 + stats.year4}</strong>
+                   <strong>Total Students:</strong> <strong>{stats.year1 + stats.year2 + stats.year3 + stats.year4} out of {(stats.year1Total||0) + (stats.year2Total||0) + (stats.year3Total||0) + (stats.year4Total||0)}</strong>
                  </div>
                </div>
              </div>
