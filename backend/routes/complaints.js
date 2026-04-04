@@ -33,7 +33,7 @@ function checkFileType(file, cb) {
     if (extname && mimetype) {
         return cb(null, true);
     } else {
-        cb('Images only!');
+        cb(new Error('Images only!'));
     }
 }
 
@@ -71,9 +71,9 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
                     userId: adminUser._id,
                     title: 'New Complaint',
                     message: `A new complaint "${title}" has been submitted by a student (Room ${complaint.roomNumber}).`,
-                    type: 'complaint_logged',
+                    type: 'general',
                     complaintId: complaint._id
-                }).catch(() => { });
+                }).catch((e) => { console.error('Notification admin err:', e.message); });
             }
         } catch (emailErr) { }
 
@@ -84,12 +84,12 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
                     to: studentUser.email,
                     subject: `Complaint Logged Successfully: ${title}`,
                     text: `Hello ${studentUser.name},\n\nYour complaint "${title}" (${category}) has been successfully submitted to the admin team. You will be notified when a worker is assigned.\n\nThank you,\nHostel Management`
-                }).catch(() => { });
+                }).catch((e) => { console.error('Email err:', e.message); });
             }
-        } catch (emailErr) { }
+        } catch (emailErr) { console.error('Email block err:', emailErr.message); }
     } catch (error) {
-        console.error("COMPLAINT POST ERROR:", error);
-        res.status(500).json({ message: error.message });
+        console.error("COMPLAINT POST ERROR (FULL):", error);
+        res.status(500).json({ message: error.message || 'Internal error creating complaint' });
     }
 });
 
