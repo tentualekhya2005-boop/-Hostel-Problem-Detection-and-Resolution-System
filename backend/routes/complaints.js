@@ -8,15 +8,7 @@ const { sendEmailNotification } = require('../utils/emailService');
 const Notification = require('../models/Notification');
 const { protect, admin, worker } = require('../middleware/authMiddleware');
 
-// Configure Multer for local storage
-const storage = multer.diskStorage({
-    destination(req, file, cb) {
-        cb(null, path.join(__dirname, '../uploads'));
-    },
-    filename(req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage,
@@ -43,7 +35,15 @@ function checkFileType(file, cb) {
 router.post('/', protect, upload.single('image'), async (req, res) => {
     try {
         const { title, description, category, roomNumber } = req.body;
-        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+        
+        // Write the file manually inside try...catch so it doesn't crash HTML
+        let imageUrl = null;
+        if (req.file) {
+            const filename = `${Date.now()}-${req.file.originalname}`;
+            const targetPath = path.join(__dirname, '../uploads', filename);
+            require('fs').writeFileSync(targetPath, req.file.buffer);
+            imageUrl = `/uploads/${filename}`;
+        }
 
         const complaint = await Complaint.create({
             studentId: req.user._id,
@@ -208,8 +208,16 @@ router.put('/:id/resolve', protect, worker, upload.single('image'), async (req, 
                 return res.status(400).json({ message: 'A completion photo is required to resolve this task' });
             }
 
+            let resolvedImageUrl = null;
+            if (req.file) {
+                const filename = `${Date.now()}-${req.file.originalname}`;
+                const targetPath = path.join(__dirname, '../uploads', filename);
+                require('fs').writeFileSync(targetPath, req.file.buffer);
+                resolvedImageUrl = `/uploads/${filename}`;
+            }
+
             complaint.status = 'Needs Verification';
-            complaint.resolvedImageUrl = `/uploads/${req.file.filename}`;
+            complaint.resolvedImageUrl = resolvedImageUrl;
 
             const updatedComplaint = await complaint.save();
 
