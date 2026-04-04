@@ -1,0 +1,12 @@
+[build]
+  base = "frontend/"
+  command = "npm run build"
+  publish = "frontend/dist/"
+
+[build.environment]
+  VITE_API_URL = "https://hostel-problem-detection-and-resolution-1c61.onrender.com"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

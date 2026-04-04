@@ -9,8 +9,30 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ─── CORS ────────────────────────────────────────────────────────────────────
+// Allow requests from Netlify, localhost (dev), and any other origins
+const allowedOrigins = [
+    'https://hostel12345.netlify.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (e.g. curl, Postman, mobile)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            return callback(null, true);
+        }
+        // Allow any netlify.app subdomain
+        if (origin.endsWith('.netlify.app')) {
+            return callback(null, true);
+        }
+        callback(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+}));
+
 app.use(express.json());
 
 const fs = require('fs');
@@ -22,53 +44,30 @@ if (!fs.existsSync(uploadsPath)) {
 
 app.use('/uploads', express.static(uploadsPath));
 
-
-const { MongoMemoryServer } = require('mongodb-memory-server');
-
-let globalMongoServer;
-
-// Connect to MongoDB
+// ─── DATABASE ─────────────────────────────────────────────────────────────────
 const connectDB = async () => {
     try {
-        if (process.env.MONGO_URI && process.env.MONGO_URI.includes('mongodb+srv')) {
-            console.log('Connecting to MongoDB Atlas...');
-            await mongoose.connect(process.env.MONGO_URI);
-            console.log('🚀 CONNECTED TO MONGODB ATLAS CLOUD DATABASE');
-        } else {
-            console.log('Starting local MongoDB engine...');
-            const dbPath = path.join(__dirname, 'database_data');
-            if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
+        const mongoUri = process.env.MONGO_URI;
 
-            globalMongoServer = await MongoMemoryServer.create({
-                instance: {
-                    port: 27017,
-                    dbPath: dbPath,
-                    storageEngine: 'wiredTiger'
-                }
-            });
-            
-            const uri = globalMongoServer.getUri() + 'hostel-portal';
-            await mongoose.connect(uri);
-            
-            console.log(`\n======================================================`);
-            console.log(`🚀 CONNECTED TO PERSISTENT DATABASE:`);
-            console.log(`👉 ACTUAL URI: ${uri}`);
-            console.log(`(Your data is now saved permanently in the /database_data folder!)`);
-            console.log(`======================================================\n`);
+        if (!mongoUri) {
+            console.error('❌ MONGO_URI is not set in environment variables!');
+            console.error('➡  Go to Render Dashboard → Your Service → Environment → Add MONGO_URI');
+            console.error('➡  Get a free Atlas URI from https://cloud.mongodb.com');
+            process.exit(1);
         }
+
+        console.log('Connecting to MongoDB Atlas...');
+        await mongoose.connect(mongoUri);
+        console.log('🚀 CONNECTED TO MONGODB ATLAS CLOUD DATABASE');
+
     } catch (err) {
-        console.error('MongoDB connection error:', err);
+        console.error('❌ MongoDB connection error:', err.message);
+        process.exit(1);
     }
 };
 connectDB();
 
-// Graceful shutdown to release port 27017 and lock files
-process.on('SIGINT', async () => {
-    if (globalMongoServer) await globalMongoServer.stop();
-    process.exit(0);
-});
-
-// Routes
+// ─── ROUTES ───────────────────────────────────────────────────────────────────
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
 const menuRoutes = require('./routes/menu');
@@ -84,11 +83,21 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/announcements', announcementRoutes);
 
 app.get('/', (req, res) => {
-    res.send('API is running...');
+    res.json({ message: 'Hostel Portal API is running ✅' });
+});
+
+// ─── 404 handler ──────────────────────────────────────────────────────────────
+app.use((req, res) => {
+    res.status(404).json({ message: `Route ${req.originalUrl} not found` });
+});
+
+// ─── Global error handler ─────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err.message);
+    res.status(500).json({ message: err.message || 'Internal Server Error' });
 });
 
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
