@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['student', 'admin', 'worker'], default: 'student' },
     roomNumber: { type: String }, // For students
     skills: [{ type: String }], // For workers
+    otp: { type: String },
+    otpExpires: { type: Date }
 }, { timestamps: true });
 
 // Hash password before saving
