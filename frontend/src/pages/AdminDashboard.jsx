@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Users, UserPlus, AlertTriangle, Calendar, Bell } from 'lucide-react';
+import { Users, UserPlus, AlertTriangle, Calendar, Bell, BarChart3 } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -19,6 +19,9 @@ const AdminDashboard = () => {
   // Announcement State
   const [announcement, setAnnouncement] = useState({ title: '', message: '', targetRole: 'all' });
 
+  // Hostel Stats State
+  const [stats, setStats] = useState({ year1: 0, year2: 0, year3: 0, year4: 0 });
+
   const getFullImageUrl = (url) => {
     if (!url) return null;
     const trimmed = url.trim();
@@ -30,7 +33,17 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchComplaints();
     fetchWorkers();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setStats(data);
+    } catch (error) { console.log('Failed to load stats'); }
+  };
 
   const fetchComplaints = async () => {
     try {
@@ -118,6 +131,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleStatsSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, stats, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      toast.success('Hostel occupancy stats updated successfully');
+    } catch (error) { toast.error('Failed to update stats'); }
+  };
+
   return (
     <div>
       <h1 className="page-title">Admin Dashboard</h1>
@@ -125,7 +148,7 @@ const AdminDashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         
         {/* Manage Complaints Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1', backgroundColor: '#f5f3ff' }}>
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
             <AlertTriangle size={24} color="var(--primary)" /> All Complaints
           </div>
@@ -246,6 +269,32 @@ const AdminDashboard = () => {
               <input type="text" className="form-input" value={newWorker.skills} onChange={e=>setNewWorker({...newWorker, skills: e.target.value})} required autoComplete="new-password" />
             </div>
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register Worker</button>
+          </form>
+        </div>
+
+        {/* Update Hostel Occupancy Stats Widget */}
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+            <BarChart3 size={24} color="var(--primary)" /> Update Hostel Occupancy
+          </div>
+          <form onSubmit={handleStatsSubmit}>
+            <div className="form-group">
+              <label className="form-label">1st Year Students (B.Tech)</label>
+              <input type="number" className="form-input" min="0" value={stats.year1} onChange={(e) => setStats({...stats, year1: Number(e.target.value)})} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">2nd Year Students (B.Tech)</label>
+              <input type="number" className="form-input" min="0" value={stats.year2} onChange={(e) => setStats({...stats, year2: Number(e.target.value)})} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">3rd Year Students (B.Tech)</label>
+              <input type="number" className="form-input" min="0" value={stats.year3} onChange={(e) => setStats({...stats, year3: Number(e.target.value)})} required />
+            </div>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">4th Year Students (B.Tech)</label>
+              <input type="number" className="form-input" min="0" value={stats.year4} onChange={(e) => setStats({...stats, year4: Number(e.target.value)})} required />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Stats</button>
           </form>
         </div>
 

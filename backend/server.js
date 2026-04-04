@@ -74,6 +74,7 @@ const menuRoutes = require('./routes/menu');
 const userRoutes = require('./routes/users');
 const notificationRoutes = require('./routes/notifications');
 const announcementRoutes = require('./routes/announcements');
+const statsRoutes = require('./routes/stats');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
@@ -81,6 +82,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.get('/', (req, res) => {
     res.json({ message: 'Hostel Portal API v2 ✅ (Cloudinary enabled)' });

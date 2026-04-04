@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { AlertCircle, Calendar, PlusCircle, Megaphone } from 'lucide-react';
+import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const StudentDashboard = () => {
@@ -11,6 +11,7 @@ const StudentDashboard = () => {
   const [menu, setMenu] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [stats, setStats] = useState(null);
   
   // New Complaint Form State
   const [title, setTitle] = useState('');
@@ -30,7 +31,17 @@ const StudentDashboard = () => {
     fetchTodayMenu();
     fetchMyComplaints();
     fetchAnnouncements();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setStats(data);
+    } catch (error) { console.log('Failed to load stats'); }
+  };
 
   const fetchAnnouncements = async () => {
     try {
@@ -213,6 +224,32 @@ const StudentDashboard = () => {
               <p style={{ opacity: 0.8, fontSize: '0.875rem' }}>No new announcements.</p>
             )}
           </div>
+
+          {/* Hostel Occupancy Widget */}
+          {stats && (
+             <div className="card" style={{ background: 'linear-gradient(135deg, var(--secondary), #be185d)', color: 'white' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem' }}>
+                 <BarChart3 size={24} /> B.Tech Students in Hostel
+               </div>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
+                   <span>1st Year Students:</span> <strong>{stats.year1}</strong>
+                 </div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
+                   <span>2nd Year Students:</span> <strong>{stats.year2}</strong>
+                 </div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
+                   <span>3rd Year Students:</span> <strong>{stats.year3}</strong>
+                 </div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.5rem' }}>
+                   <span>4th Year Students:</span> <strong>{stats.year4}</strong>
+                 </div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.3)', borderRadius: '0.5rem', marginTop: '0.5rem' }}>
+                   <strong>Total Students:</strong> <strong>{stats.year1 + stats.year2 + stats.year3 + stats.year4}</strong>
+                 </div>
+               </div>
+             </div>
+          )}
 
         </div>
       </div>
