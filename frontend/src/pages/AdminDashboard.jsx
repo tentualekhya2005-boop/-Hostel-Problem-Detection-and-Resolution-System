@@ -2,7 +2,10 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Users, UserPlus, AlertTriangle, Calendar, Bell, BarChart3 } from 'lucide-react';
+import { Users, UserPlus, AlertTriangle, Calendar, Bell, BarChart3, Download, PieChart as PieChartIcon } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -141,11 +144,83 @@ const AdminDashboard = () => {
     } catch (error) { toast.error('Failed to update stats'); }
   };
 
+  const generatePDF = async () => {
+    const input = document.getElementById('report-content');
+    if (!input) return;
+    try {
+      toast.info('Generating PDF Report...', { autoClose: 1000 });
+      const canvas = await html2canvas(input, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.setFontSize(18);
+      pdf.text('Hostel Problem Detection & Notification System', 10, 10);
+      pdf.setFontSize(12);
+      pdf.text(`Official Executive Report - generated on ${new Date().toLocaleDateString()}`, 10, 18);
+      
+      pdf.addImage(imgData, 'PNG', 0, 25, pdfWidth, pdfHeight);
+      pdf.save(`Hostel_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('PDF Downloaded successfully!');
+    } catch (err) {
+      toast.error('Failed to generate PDF');
+    }
+  };
+
+  const categoryData = complaints.reduce((acc, comp) => {
+    const cat = comp.category ? comp.category.charAt(0).toUpperCase() + comp.category.slice(1) : 'Other';
+    const existing = acc.find(item => item.name === cat);
+    if (existing) existing.value += 1;
+    else acc.push({ name: cat, value: 1 });
+    return acc;
+  }, []);
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ef4444'];
+
   return (
     <div>
-      <h1 className="page-title">Admin Dashboard</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 className="page-title">Admin Dashboard</h1>
+        <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <Download size={20} /> Export Report to PDF
+        </button>
+      </div>
 
+      <div id="report-content" style={{ padding: '10px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+        
+        {/* Visual Analytics Widget */}
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+            <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
+          </div>
+          <div style={{ width: '100%', height: 300, display: 'flex', justifyContent: 'center' }}>
+            {complaints.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p style={{ alignSelf: 'center', color: 'var(--text-muted)' }}>No complaints recorded yet.</p>
+            )}
+          </div>
+        </div>
         
         {/* Manage Complaints Widget */}
         <div className="card" style={{ gridColumn: '1 / -1' }}>
@@ -343,6 +418,7 @@ const AdminDashboard = () => {
           </form>
         </div>
 
+      </div>
       </div>
     </div>
   );
