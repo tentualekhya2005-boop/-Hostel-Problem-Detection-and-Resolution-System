@@ -126,7 +126,7 @@ const StudentDashboard = () => {
     <div>
       <h1 className="page-title">{t('dashboard')}</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
         {/* Submit Complaint Box */}
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1.25rem' }}>
@@ -168,7 +168,7 @@ const StudentDashboard = () => {
               <Calendar size={24} /> {t('todays_menu')}
             </div>
             {menu ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem', fontSize: '0.875rem' }}>
                 <div><strong>Breakfast:</strong> <br/>{menu.breakfast}</div>
                 <div><strong>Lunch:</strong> <br/>{menu.lunch}</div>
                 <div><strong>Snacks:</strong> <br/>{menu.snacks}</div>
@@ -222,7 +222,7 @@ const StudentDashboard = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontWeight: 600, fontSize: '1.25rem' }}>
           <AlertCircle size={24} /> {t('recent_complaints')}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {complaints.length === 0 ? (
                 <p className="text-muted">No complaints submitted yet.</p>
               ) : (

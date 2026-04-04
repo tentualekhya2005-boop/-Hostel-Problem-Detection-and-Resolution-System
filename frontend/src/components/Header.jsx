@@ -71,7 +71,9 @@ const Header = ({ user }) => {
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
             <User size={18} />
           </div>
-          {user.name} ({user.role})
+          <span className="header-user-text">
+            {user.name} ({user.role})
+          </span>
         </div>
         {user && <NotificationBell />}
         <button onClick={handleLogout} className="btn" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-main)' }}>

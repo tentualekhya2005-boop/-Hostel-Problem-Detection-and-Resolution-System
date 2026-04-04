@@ -122,7 +122,7 @@ const AdminDashboard = () => {
     <div>
       <h1 className="page-title">Admin Dashboard</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         
         {/* Manage Complaints Widget */}
         <div className="card" style={{ gridColumn: '1 / -1', backgroundColor: '#f5f3ff' }}>
@@ -255,7 +255,7 @@ const AdminDashboard = () => {
             <Bell size={24} color="var(--primary)" /> Send Announcement
           </div>
           <form onSubmit={handleSendAnnouncement}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Target Audience</label>
                 <select className="form-select" value={announcement.targetRole} onChange={(e) => setAnnouncement({...announcement, targetRole: e.target.value})} required>
