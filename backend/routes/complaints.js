@@ -2,31 +2,62 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const { sendEmailNotification } = require('../utils/emailService');
 const Notification = require('../models/Notification');
 const { protect, admin, worker } = require('../middleware/authMiddleware');
+const cloudinary = require('../utils/cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-const storage = multer.memoryStorage();
+
+// Use Cloudinary storage if credentials are set, otherwise memory storage (fallback)
+const hasCloudinary = process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET;
+
+const storage = hasCloudinary
+    ? new CloudinaryStorage({
+        cloudinary,
+        params: {
+            folder: 'hostel-complaints',
+            allowed_formats: ['jpg', 'jpeg', 'png'],
+            resource_type: 'image',
+        },
+    })
+    : multer.memoryStorage();
 
 const upload = multer({
     storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     fileFilter: function (req, file, cb) {
-        checkFileType(file, cb);
+        const filetypes = /jpg|jpeg|png/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        if (extname) return cb(null, true);
+        cb(new Error('Images only! (invalid extension)'));
     }
 });
 
-function checkFileType(file, cb) {
-    const filetypes = /jpg|jpeg|png/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Images only! (invalid extension)'));
+// Helper: get URL from uploaded file (works for both Cloudinary and memory storage)
+function getImageUrl(file) {
+    if (!file) return null;
+    // Cloudinary attaches .path or .secure_url
+    if (file.path) return file.path; // Cloudinary returns the URL in file.path with multer-storage-cloudinary
+    // Memory storage: no URL (we'll save to local disk as fallback)
+    if (file.buffer) {
+        try {
+            const uploadsDir = path.join(__dirname, '../uploads');
+            if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+            const filename = `${Date.now()}-${file.originalname}`;
+            fs.writeFileSync(path.join(uploadsDir, filename), file.buffer);
+            return `/uploads/${filename}`;
+        } catch (e) {
+            console.error('Local file write failed:', e.message);
+            return null; // Graceful degradation — complaint saves without image
+        }
     }
+    return null;
 }
 
 // @route   POST /api/complaints
@@ -41,14 +72,9 @@ router.post('/', protect, (req, res) => {
 
         try {
             const { title, description, category, roomNumber } = req.body;
-            
-            let imageUrl = null;
-            if (req.file) {
-                const filename = `${Date.now()}-${req.file.originalname}`;
-                const targetPath = path.join(__dirname, '../uploads', filename);
-                require('fs').writeFileSync(targetPath, req.file.buffer);
-                imageUrl = `/uploads/${filename}`;
-            }
+
+            // Get image URL from Cloudinary (or local disk fallback)
+            const imageUrl = getImageUrl(req.file);
 
             const complaint = await Complaint.create({
                 studentId: req.user._id,
@@ -219,16 +245,10 @@ router.put('/:id/resolve', protect, worker, (req, res) => {
                     return res.status(400).json({ message: 'A completion photo is required to resolve this task' });
                 }
 
-                let resolvedImageUrl = null;
-                if (req.file) {
-                const filename = `${Date.now()}-${req.file.originalname}`;
-                const targetPath = path.join(__dirname, '../uploads', filename);
-                require('fs').writeFileSync(targetPath, req.file.buffer);
-                resolvedImageUrl = `/uploads/${filename}`;
-            }
+                const resolvedImageUrl = getImageUrl(req.file);
 
-            complaint.status = 'Needs Verification';
-            complaint.resolvedImageUrl = resolvedImageUrl;
+                complaint.status = 'Needs Verification';
+                complaint.resolvedImageUrl = resolvedImageUrl;
 
             const updatedComplaint = await complaint.save();
 
