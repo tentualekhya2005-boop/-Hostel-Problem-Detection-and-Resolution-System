@@ -353,11 +353,11 @@ router.put('/:id/admin-resolve', protect, admin, async (req, res) => {
                 try {
                     const studentUser = await User.findById(complaint.studentId);
                     if (studentUser) {
-                        await sendEmailNotification({
+                        sendEmailNotification({
                             to: studentUser.email,
                             subject: `Complaint Closed: ${complaint.title}`,
                             text: `Hello ${studentUser.name},\n\nThe admin has reviewed and finalized the resolution for your complaint "${complaint.title}". The complaint is now officially closed.\n\nThank you,\nHostel Management`
-                        });
+                        }).catch(e => console.error(e));
 
                         // In-app notification for student
                         await Notification.create({
@@ -377,11 +377,11 @@ router.put('/:id/admin-resolve', protect, admin, async (req, res) => {
                 try {
                     const workerUser = await User.findById(complaint.assignedWorkerId);
                     if (workerUser) {
-                        await sendEmailNotification({
+                        sendEmailNotification({
                             to: workerUser.email,
                             subject: `Task Re-assigned: ${complaint.title}`,
                             text: `Hello ${workerUser.name},\n\nThe admin has rejected the resolution and re-assigned this task back to you. Please check the dashboard and ensure the work is completed property.`
-                        });
+                        }).catch(e => console.error(e));
 
                         await Notification.create({
                             userId: workerUser._id,
