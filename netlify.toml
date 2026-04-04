@@ -4,7 +4,7 @@
   publish = "frontend/dist/"
 
 [build.environment]
-  VITE_API_URL = "https://hostel-problem-detection-and-resolution-1c61.onrender.com"
+  VITE_API_URL = "https://hostel-problem-detection-and-resolution-ic6i.onrender.com"
 
 [[redirects]]
   from = "/*"
