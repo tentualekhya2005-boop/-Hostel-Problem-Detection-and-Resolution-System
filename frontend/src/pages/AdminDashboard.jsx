@@ -125,7 +125,7 @@ const AdminDashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
         
         {/* Manage Complaints Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
+        <div className="card" style={{ gridColumn: '1 / -1', backgroundColor: '#f5f3ff' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
             <AlertTriangle size={24} color="var(--primary)" /> All Complaints
           </div>
