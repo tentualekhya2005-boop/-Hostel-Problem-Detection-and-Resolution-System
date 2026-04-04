@@ -32,32 +32,37 @@ function checkFileType(file, cb) {
 // @route   POST /api/complaints
 // @desc    Student submits a complaint
 // @access  Student (or anyone logged in for simplicity, but logically student)
-router.post('/', protect, upload.single('image'), async (req, res) => {
-    try {
-        const { title, description, category, roomNumber } = req.body;
-        
-        // Write the file manually inside try...catch so it doesn't crash HTML
-        let imageUrl = null;
-        if (req.file) {
-            const filename = `${Date.now()}-${req.file.originalname}`;
-            const targetPath = path.join(__dirname, '../uploads', filename);
-            require('fs').writeFileSync(targetPath, req.file.buffer);
-            imageUrl = `/uploads/${filename}`;
+router.post('/', protect, (req, res) => {
+    upload.single('image')(req, res, async (err) => {
+        if (err) {
+            console.error("MULTER UPLOAD ERROR:", err.message || err);
+            return res.status(500).json({ message: err.message || 'Multer processing error' });
         }
 
-        const complaint = await Complaint.create({
-            studentId: req.user._id,
-            title,
-            description,
-            category,
-            roomNumber: roomNumber || req.user.roomNumber || 'Unknown',
-            imageUrl
-        });
+        try {
+            const { title, description, category, roomNumber } = req.body;
+            
+            let imageUrl = null;
+            if (req.file) {
+                const filename = `${Date.now()}-${req.file.originalname}`;
+                const targetPath = path.join(__dirname, '../uploads', filename);
+                require('fs').writeFileSync(targetPath, req.file.buffer);
+                imageUrl = `/uploads/${filename}`;
+            }
 
-        // Respond immediately to the student
-        res.status(201).json(complaint);
+            const complaint = await Complaint.create({
+                studentId: req.user._id,
+                title,
+                description,
+                category,
+                roomNumber: roomNumber || req.user.roomNumber || 'Unknown',
+                imageUrl
+            });
 
-        // Send emails in the background (non-blocking)
+            // Respond immediately to the student
+            res.status(201).json(complaint);
+
+            // Send emails in the background (non-blocking)
         try {
             const admins = await User.find({ role: 'admin' });
             for (let adminUser of admins) {
@@ -91,6 +96,7 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
         console.error("COMPLAINT POST ERROR (FULL):", error);
         res.status(500).json({ message: error.message || 'Internal error creating complaint' });
     }
+    }); // Close upload.single callback
 });
 
 // @route   GET /api/complaints/student
@@ -198,18 +204,23 @@ router.get('/worker', protect, worker, async (req, res) => {
 // @route   PUT /api/complaints/:id/resolve
 // @desc    Worker marks complaint as resolved and uploads proof photo
 // @access  Worker
-router.put('/:id/resolve', protect, worker, upload.single('image'), async (req, res) => {
-    try {
-        const complaint = await Complaint.findById(req.params.id);
+router.put('/:id/resolve', protect, worker, (req, res) => {
+    upload.single('image')(req, res, async (err) => {
+        if (err) {
+            console.error("MULTER RESOLVE ERROR:", err.message || err);
+            return res.status(500).json({ message: err.message || 'Multer upload error' });
+        }
+        try {
+            const complaint = await Complaint.findById(req.params.id);
 
-        // Ensure this worker is actually assigned to this task
-        if (complaint && complaint.assignedWorkerId.toString() === req.user._id.toString()) {
-            if (!req.file) {
-                return res.status(400).json({ message: 'A completion photo is required to resolve this task' });
-            }
+            // Ensure this worker is actually assigned to this task
+            if (complaint && complaint.assignedWorkerId.toString() === req.user._id.toString()) {
+                if (!req.file) {
+                    return res.status(400).json({ message: 'A completion photo is required to resolve this task' });
+                }
 
-            let resolvedImageUrl = null;
-            if (req.file) {
+                let resolvedImageUrl = null;
+                if (req.file) {
                 const filename = `${Date.now()}-${req.file.originalname}`;
                 const targetPath = path.join(__dirname, '../uploads', filename);
                 require('fs').writeFileSync(targetPath, req.file.buffer);
@@ -251,6 +262,7 @@ router.put('/:id/resolve', protect, worker, upload.single('image'), async (req, 
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+    }); // Close upload callback
 });
 
 // @route   PUT /api/complaints/:id/verify-resolution
