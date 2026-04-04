@@ -22,8 +22,8 @@ const AdminDashboard = () => {
   const getFullImageUrl = (url) => {
     if (!url) return null;
     const trimmed = url.trim();
-    if (trimmed.startsWith('http')) return trimmed;
-    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+    if (trimmed.toLowerCase().startsWith('http')) return trimmed;
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/['"]/g, '').replace(/\/$/, '');
     return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
   };
 
