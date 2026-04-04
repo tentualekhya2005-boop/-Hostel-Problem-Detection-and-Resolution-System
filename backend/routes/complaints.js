@@ -404,25 +404,6 @@ router.put('/:id/admin-resolve', protect, admin, async (req, res) => {
     }
 });
 
-// @route   DELETE /api/complaints/:id
-// @desc    Student soft-deletes resolved complaint
-// @access  Student
-router.delete('/:id', protect, async (req, res) => {
-    try {
-        const complaint = await Complaint.findById(req.params.id);
-
-        if (complaint && complaint.studentId.toString() === req.user._id.toString()) {
-            complaint.isDeletedByStudent = true;
-            await complaint.save();
-            res.json({ message: 'Complaint hidden for student' });
-        } else {
-            res.status(404).json({ message: 'Complaint not found or unauthorized' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
 // @route   DELETE /api/complaints/worker/:id
 // @desc    Worker soft-deletes a complaint from their dashboard
 // @access  Worker
@@ -454,6 +435,25 @@ router.delete('/admin/:id', protect, admin, async (req, res) => {
             res.json({ message: 'Complaint permanently deleted' });
         } else {
             res.status(404).json({ message: 'Complaint not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @route   DELETE /api/complaints/:id
+// @desc    Student soft-deletes resolved complaint
+// @access  Student
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const complaint = await Complaint.findById(req.params.id);
+
+        if (complaint && complaint.studentId.toString() === req.user._id.toString()) {
+            complaint.isDeletedByStudent = true;
+            await complaint.save();
+            res.json({ message: 'Complaint hidden for student' });
+        } else {
+            res.status(404).json({ message: 'Complaint not found or unauthorized' });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });

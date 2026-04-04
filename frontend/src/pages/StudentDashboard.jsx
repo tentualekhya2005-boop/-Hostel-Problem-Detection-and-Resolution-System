@@ -18,6 +18,14 @@ const StudentDashboard = () => {
   const [category, setCategory] = useState('electrical');
   const [image, setImage] = useState(null);
 
+  const getFullImageUrl = (url) => {
+    if (!url) return null;
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http')) return trimmed;
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+    return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
+  };
+
   useEffect(() => {
     fetchTodayMenu();
     fetchMyComplaints();
@@ -236,7 +244,7 @@ const StudentDashboard = () => {
                       <div style={{ marginTop: '0.75rem' }}>
                         <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>📸 Your Original Issue Photo:</strong>
                         <img 
-                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${comp.imageUrl}`} 
+                          src={getFullImageUrl(comp.imageUrl)} 
                           alt="Issue" 
                           style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
                         />
@@ -247,7 +255,7 @@ const StudentDashboard = () => {
                       <div style={{ marginTop: '0.75rem' }}>
                         <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Worker's Resolution Photo:</strong>
                         <img 
-                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${comp.resolvedImageUrl}`} 
+                          src={getFullImageUrl(comp.resolvedImageUrl)} 
                           alt="Resolution Proof" 
                           style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
                         />

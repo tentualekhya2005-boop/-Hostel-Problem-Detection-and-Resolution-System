@@ -19,6 +19,14 @@ const AdminDashboard = () => {
   // Announcement State
   const [announcement, setAnnouncement] = useState({ title: '', message: '', targetRole: 'all' });
 
+  const getFullImageUrl = (url) => {
+    if (!url) return null;
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http')) return trimmed;
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+    return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
+  };
+
   useEffect(() => {
     fetchComplaints();
     fetchWorkers();
@@ -141,8 +149,16 @@ const AdminDashboard = () => {
                     <td style={{ padding: '0.75rem' }}>{c.studentId?.name} ({c.roomNumber})</td>
                     <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
                     <td style={{ padding: '0.75rem' }}>
-                      {c.imageUrl && <div style={{ marginBottom: '0.25rem' }}><a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${c.imageUrl}`} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--primary)'}}>📸 Issue Photo</a></div>}
-                      {c.resolvedImageUrl && <div><a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${c.resolvedImageUrl}`} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)'}}>✅ Resolved Photo</a></div>}
+                      {c.imageUrl && (
+                        <div style={{ marginBottom: '0.25rem' }}>
+                          <a href={getFullImageUrl(c.imageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--primary)'}}>📸 Issue Photo</a>
+                        </div>
+                      )}
+                      {c.resolvedImageUrl && (
+                        <div>
+                          <a href={getFullImageUrl(c.resolvedImageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)'}}>✅ Resolved Photo</a>
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '0.75rem' }}>
                       <span className={`badge badge-${c.status.toLowerCase().replace(/ /g, '-')}`} style={{ textAlign: 'center' }}>{c.status}</span>

@@ -9,6 +9,14 @@ const WorkerDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [resolveImages, setResolveImages] = useState({});
 
+  const getFullImageUrl = (url) => {
+    if (!url) return null;
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http')) return trimmed;
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+    return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
+  };
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -84,7 +92,7 @@ const WorkerDashboard = () => {
                 
                 {task.imageUrl && (
                   <div style={{ marginBottom: '1rem' }}>
-                    <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${task.imageUrl}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>View Student's Attached Image</a>
+                    <a href={getFullImageUrl(task.imageUrl)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>View Student's Attached Image</a>
                   </div>
                 )}
 
@@ -92,7 +100,7 @@ const WorkerDashboard = () => {
                   <div style={{ marginBottom: '1rem' }}>
                     <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Your Resolution Photo:</strong>
                     <img 
-                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${task.resolvedImageUrl}`} 
+                      src={getFullImageUrl(task.resolvedImageUrl)} 
                       alt="Resolved" 
                       style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
                     />
