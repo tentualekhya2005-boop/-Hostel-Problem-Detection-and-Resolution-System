@@ -14,6 +14,7 @@ const Sidebar = ({ role }) => {
       case 'student':
         return [
           { name: t('dashboard'), path: '/', icon: <Home size={22} /> },
+          { name: 'Daily Attendance', path: '/attendance', icon: <Fingerprint size={22} /> },
           { name: t('my_complaints'), path: '/complaints', icon: <Radio size={22} /> },
           { name: t('todays_menu'), path: '/menu', icon: <Utensils size={22} /> },
           { name: 'My Favourites', path: '#', icon: <Heart size={22} /> },
@@ -21,6 +22,7 @@ const Sidebar = ({ role }) => {
       case 'admin':
         return [
           { name: t('dashboard'), path: '/', icon: <Home size={22} /> },
+          { name: 'Attendance Report', path: '/attendance-report', icon: <Fingerprint size={22} /> },
           { name: t('all_complaints'), path: '/admin-complaints', icon: <List size={22} /> },
           { name: t('manage_users'), path: '/users', icon: <Users size={22} /> },
           { name: t('manage_menu'), path: '/manage-menu', icon: <Utensils size={22} /> },

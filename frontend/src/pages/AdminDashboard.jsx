@@ -22,8 +22,12 @@ const AdminDashboard = () => {
   // Announcement State
   const [announcement, setAnnouncement] = useState({ title: '', message: '', targetRole: 'all' });
 
-  // Hostel Stats State
-  const [stats, setStats] = useState({ year1: 0, year2: 0, year3: 0, year4: 0 });
+  // Stats State
+  const [stats, setStats] = useState({ 
+    total: 0, pending: 0, assigned: 0, resolved: 0,
+    year1: 0, year2: 0, year3: 0, year4: 0 
+  });
+  const [attendanceData, setAttendanceData] = useState({ presentCount: 0, totalStudents: 0, reports: [] });
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
@@ -35,9 +39,23 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchComplaints();
-    fetchWorkers();
     fetchStats();
-  }, []);
+    fetchWorkers();
+    if (location.pathname === '/attendance-report') {
+      fetchAttendance();
+    }
+  }, [location.pathname]);
+
+  const fetchAttendance = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/daily-report`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setAttendanceData(data);
+    } catch (e) {
+      toast.error('Failed to load attendance report');
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -186,12 +204,57 @@ const AdminDashboard = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">Admin Dashboard</h1>
-        <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <Download size={20} /> Export Report to PDF
-        </button>
+        <h1 className="page-title">{location.pathname === '/attendance-report' ? 'Attendance Report' : 'Admin Dashboard'}</h1>
+        {location.pathname !== '/attendance-report' && (
+          <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <Download size={20} /> Export Report to PDF
+          </button>
+        )}
       </div>
 
+      {location.pathname === '/attendance-report' ? (
+        <div className="card animate-fade-in">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Daily Summary ({attendanceData.date})</h2>
+              <p className="text-muted">Tracking students within 200m hostel geofence</p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--primary)' }}>{attendanceData.presentCount} / {attendanceData.totalStudents}</div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>STUDENTS PRESENT</div>
+            </div>
+          </div>
+
+          <div className="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Room / Block</th>
+                  <th>Year</th>
+                  <th>Check-in Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceData.reports.length > 0 ? (
+                  attendanceData.reports.map((r) => (
+                    <tr key={r._id}>
+                      <td><div style={{ fontWeight: 700 }}>{r.studentId?.name}</div></td>
+                      <td>{r.studentId?.roomNumber} / <span style={{ color: 'var(--plum)' }}>{r.studentId?.block}</span></td>
+                      <td>{r.studentId?.year}</td>
+                      <td>{new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                      <td><span className="badge badge-resolved">✅ Present</span></td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>No attendance records found for today.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
       <div id="report-content" style={{ padding: '10px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         
@@ -465,6 +528,7 @@ const AdminDashboard = () => {
 
       </div>
       </div>
+      )}
     </div>
   );
 };
