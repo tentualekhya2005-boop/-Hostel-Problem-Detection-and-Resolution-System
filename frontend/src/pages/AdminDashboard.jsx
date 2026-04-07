@@ -203,19 +203,22 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">Admin Dashboard</h1>
-        <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <Download size={20} /> Export Report to PDF
+    <div style={{ paddingBottom: '3rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div>
+          <h1 className="page-title" style={{ marginBottom: '0.25rem' }}>Admin Dashboard</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Overview of all hostel operations</p>
+        </div>
+        <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: '2rem' }}>
+          <Download size={20} /> Export Report
         </button>
       </div>
 
-      <div id="report-content" style={{ padding: '10px' }}>
+      <div id="report-content" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
       {/* Admin AI Insights Panel */}
-      <div className="card" style={{ marginBottom: '2rem', background: 'linear-gradient(to right, #1e3a8a, #312e81)', color: 'white' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem' }}>
+      <div className="card card-gradient" style={{ border: 'none', borderRadius: '1.5rem', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem', color: 'white' }}>
           ✨ AI System Insights
         </div>
         <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.8' }}>
@@ -225,12 +228,18 @@ const AdminDashboard = () => {
         </ul>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
         
         {/* Visual Analytics Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
+        <div className="card" style={{ gridColumn: '1 / -1', border: 'none', borderRadius: '1.5rem', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1.25rem' }}>
+              <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
+            </div>
+            <div className="segmented-control">
+              <div className="segment-item active">This Week</div>
+              <div className="segment-item">This Month</div>
+            </div>
           </div>
           <div style={{ width: '100%', height: 300, display: 'flex', justifyContent: 'center' }}>
             {complaints.length > 0 ? (
@@ -260,27 +269,27 @@ const AdminDashboard = () => {
         </div>
         
         {/* Manage Complaints Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+        <div className="card" style={{ gridColumn: '1 / -1', border: 'none', borderRadius: '1.5rem', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.08)', padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '2rem 2rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
             <AlertTriangle size={24} color="var(--primary)" /> All Complaints
           </div>
           
-          <div style={{ overflowX: 'auto' }}>
+          <div style={{ overflowX: 'auto', padding: '0 2rem 2rem' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
-                  <th style={{ padding: '0.75rem' }}>Title</th>
-                  <th style={{ padding: '0.75rem' }}>Student / Room</th>
-                  <th style={{ padding: '0.75rem' }}>Category</th>
-                  <th style={{ padding: '0.75rem' }}>Photos</th>
-                  <th style={{ padding: '0.75rem' }}>Status</th>
-                  <th style={{ padding: '0.75rem' }}>Action / Assignment</th>
+                <tr style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Title</th>
+                  <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Student / Room</th>
+                  <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Category</th>
+                  <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Photos</th>
+                  <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Status</th>
+                  <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Action / Assignment</th>
                 </tr>
               </thead>
               <tbody>
                 {complaints.map(c => (
-                  <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: 500 }}>
+                  <tr key={c._id} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='rgba(0,0,0,0.02)'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                    <td style={{ padding: '1.25rem 1rem', fontWeight: 600, color: 'var(--text-main)' }}>
                        {c.title}
                        <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                           {c.severity && <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: c.severity === 'High' ? '#fee2e2' : c.severity === 'Low' ? '#f0fdf4' : '#fff7ed', color: c.severity === 'High' ? '#ef4444' : c.severity === 'Low' ? '#22c55e' : '#f97316' }}>{c.severity}</span>}

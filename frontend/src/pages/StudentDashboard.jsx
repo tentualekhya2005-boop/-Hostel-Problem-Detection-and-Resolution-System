@@ -160,8 +160,11 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div>
-      <h1 className="page-title">{t('dashboard')}</h1>
+    <div style={{ paddingBottom: '80px' }}>
+      <div style={{ marginBottom: '2rem' }}>
+         <h1 className="page-title" style={{ marginBottom: '0.25rem' }}>Good Morning, {user?.name ? user.name.split(' ')[0] : 'Student'}!</h1>
+         <p style={{ color: 'var(--text-muted)' }}>Here's a quick look at your day.</p>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
         {/* Submit Complaint Box */}
@@ -285,24 +288,27 @@ const StudentDashboard = () => {
           )}
 
           {/* Student Analytics & Gamification Widget */}
-          <div className="card" style={{ background: 'linear-gradient(135deg, var(--glass-bg), var(--bg-main))', border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem', color: 'var(--text-main)' }}>
-               My Analytics & Badges
+          <div className="card card-gradient" style={{ border: 'none', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', fontWeight: 600, fontSize: '1.25rem', color: 'white' }}>
+               <BarChart3 size={24} /> My Analytics & Badges
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-muted)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Total Complaints:</span> <strong>{complaints.length}</strong>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', color: 'white' }}>
+              
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '1.25rem', borderRadius: '1rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>{complaints.length}</div>
+                  <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.8 }}>Total Reports</div>
+                </div>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '1.25rem', borderRadius: '1rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>{complaints.filter(c => ['Student Verified', 'Resolved'].includes(c.status)).length}</div>
+                  <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.8 }}>Resolved</div>
+                </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Resolved:</span> <strong>{complaints.filter(c => ['Student Verified', 'Resolved'].includes(c.status)).length}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Pending:</span> <strong>{complaints.filter(c => !['Student Verified', 'Resolved', 'Student Rejected'].includes(c.status)).length}</strong>
-              </div>
-              <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '0.875rem' }}>Badges:</span>
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-                  {complaints.length > 5 ? <span className="badge badge-success">🏆 Active Reporter</span> : <span style={{ fontSize: '0.8rem' }}>Report 5 issues to get a badge!</span>}
+
+              <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Unlocked Badges:</span>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  {complaints.length >= 5 ? <span style={{ background: 'rgba(255,255,255,0.9)', color: 'var(--primary)', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>🏆 Active Reporter</span> : <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>Report {5 - complaints.length} more issues to get a badge!</span>}
                 </div>
               </div>
             </div>
@@ -311,27 +317,50 @@ const StudentDashboard = () => {
         </div>
       </div>
 
-      {/* Recent Complaints Widget (Full Width) */}
-      <div className="card" style={{ marginTop: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontWeight: 600, fontSize: '1.25rem' }}>
-          <AlertCircle size={24} /> {t('recent_complaints')}
+      {/* Recent Complaints Widget - Redesigned to match Screenshot 1 */}
+      <div style={{ marginTop: '3rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)', fontWeight: 600, fontSize: '1.25rem' }}>
+            <AlertCircle size={24} /> {t('recent_complaints')}
+          </div>
+          <div className="segmented-control">
+            <div className="segment-item active">All Tasks</div>
+            <div className="segment-item">Pending</div>
+            <div className="segment-item">Resolved</div>
+          </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {complaints.length === 0 ? (
-                <p className="text-muted">No complaints submitted yet.</p>
+                <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                   No complaints submitted yet. Add one above!
+                </div>
               ) : (
-                complaints.slice(0, 6).map((comp, idx) => (
-                  <div key={comp._id} style={{ 
-                    display: 'flex', flexDirection: 'column', padding: '1.25rem', 
-                    border: idx === 0 ? '2px solid var(--primary)' : '1px solid var(--border)', 
-                    borderRadius: '0.75rem', 
-                    backgroundColor: idx === 0 ? '#f0f9ff' : 'var(--glass-bg)', 
-                    height: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' 
+                complaints.map((comp, idx) => (
+                  <div key={comp._id} className="card" style={{ 
+                    display: 'flex', flexDirection: 'column', padding: '1.25rem 1.5rem',
+                    border: 'none',
+                    borderRadius: '1.25rem',
+                    marginBottom: 0
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                      <strong style={{ color: 'var(--text-main)' }}>{comp.title}</strong>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {comp.severity && <span className={`badge`} style={{ backgroundColor: comp.severity === 'High' ? '#fee2e2' : comp.severity === 'Low' ? '#f0fdf4' : '#fff7ed', color: comp.severity === 'High' ? '#ef4444' : comp.severity === 'Low' ? '#22c55e' : '#f97316' }}>{comp.severity} Priority</span>}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ 
+                          width: '40px', height: '40px', borderRadius: '10px', 
+                          background: comp.severity === 'High' ? 'var(--danger-light)' : 'var(--warning-light)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: comp.severity === 'High' ? 'var(--danger)' : 'var(--warning)'
+                        }}>
+                          ≡
+                        </div>
+                        <div>
+                          <strong style={{ color: 'var(--text-main)', fontSize: '1.1rem', display: 'block' }}>{comp.title}</strong>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{comp.category}</span>
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        {comp.severity && <span style={{ fontSize: '0.75rem', fontWeight: 600, color: comp.severity === 'High' ? 'var(--danger)' : comp.severity === 'Low' ? 'var(--success)' : 'var(--warning)' }}>{comp.severity}</span>}
                         <span className={`badge badge-${comp.status.replace(/\s+/g, '-').toLowerCase()}`}>{comp.status}</span>
                       </div>
                     </div>
@@ -382,17 +411,16 @@ const StudentDashboard = () => {
                       </div>
                     )}
                     
-                    <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ marginTop: 'auto', paddingTop: '1rem', paddingLeft: '56px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           {new Date(comp.createdAt).toLocaleDateString()}
                         </div>
                         <button 
-                          className="btn btn-secondary" 
-                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171' }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
                           onClick={() => handleDelete(comp._id)}
                         >
-                          Delete
+                          View Details →
                         </button>
                       </div>
                     </div>
@@ -401,6 +429,17 @@ const StudentDashboard = () => {
               )}
         </div>
       </div>
+
+      {/* Floating Pill Nav for Mobile Impression (Image 1) */}
+      <div style={{ position: 'fixed', bottom: '2rem', left: '0', width: '100%', display: 'flex', justifyContent: 'center', zIndex: 50, pointerEvents: 'none' }}>
+        <div className="floating-pill" style={{ pointerEvents: 'auto' }}>
+           <div className="floating-pill-item"><span style={{fontSize:'1.2rem'}}>⊞</span></div>
+           <div className="floating-pill-item active" style={{background: 'var(--primary)'}}><span style={{fontSize:'1.2rem'}}>🛡️</span></div>
+           <div className="floating-pill-item"><span style={{fontSize:'1.2rem'}}>📁</span></div>
+           <div className="floating-pill-item"><span style={{fontSize:'1.2rem'}}>👤</span></div>
+        </div>
+      </div>
+
     </div>
   );
 }

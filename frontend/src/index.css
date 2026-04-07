@@ -9,27 +9,28 @@
   --accent: #8b5cf6;
   
   /* Glassmorphism Variables */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-  --glass-blur: blur(12px);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+  --glass-blur: blur(20px);
 
   /* Typography Core Colors */
-  --text-main: #0f172a;
-  --text-muted: #475569;
+  --text-main: #111827;
+  --text-muted: #6b7280;
   
   /* Functional Colors */
   --danger: #ef4444;
-  --danger-light: #fee2e2;
+  --danger-light: #fef2f2;
   --warning: #f59e0b;
-  --warning-light: #fef3c7;
+  --warning-light: #fffbeb;
   --success: #10b981;
-  --success-light: #d1fae5;
+  --success-light: #ecfdf5;
   --info: #3b82f6;
-  --info-light: #dbeafe;
+  --info-light: #eff6ff;
   
-  --border: rgba(226, 232, 240, 0.8);
-  --radius: 1rem;
+  --border: #f3f4f6;
+  --radius: 1.5rem; /* Increased for that modern mobile/UI feel */
+  --radius-sm: 0.75rem;
   --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -48,11 +49,11 @@ body {
   background-color: #f8fafc;
   /* Premium Animated Mesh Gradient Background */
   background-image: 
-    radial-gradient(at 0% 0%, hsla(253,16%,87%,1) 0, transparent 50%), 
-    radial-gradient(at 50% 0%, hsla(225,39%,89%,1) 0, transparent 50%), 
-    radial-gradient(at 100% 0%, hsla(339,49%,88%,1) 0, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(245,60%,92%,1) 0, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(202,70%,89%,1) 0, transparent 50%);
+    radial-gradient(at 0% 0%, hsla(253,16%,95%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,96%,1) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,94%,1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(245,60%,96%,1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(202,70%,95%,1) 0, transparent 50%);
   background-attachment: fixed;
   background-size: 200% 200%;
   animation: dynamicMesh 15s ease infinite alternate;
@@ -99,16 +100,26 @@ a:hover { color: var(--primary-hover); }
   border-radius: var(--radius);
   box-shadow: var(--glass-shadow);
   border: 1px solid var(--glass-border);
-  padding: 1.75rem;
+  padding: 2rem;
   transition: var(--transition-smooth);
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 35px 0 rgba(31, 38, 135, 0.1);
-  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 45px -10px rgba(0,0,0,0.1);
+  border-color: rgba(255, 255, 255, 1);
 }
+
+.card-gradient {
+  background: linear-gradient(135deg, var(--primary), #3b82f6);
+  color: white;
+  border: none;
+  box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.4);
+}
+.card-gradient .text-muted { color: rgba(255,255,255,0.8) !important; }
+.card-gradient .form-label { color: white; }
+
 
 /* Forms & Inputs */
 .form-group {
@@ -304,20 +315,55 @@ a:hover { color: var(--primary-hover); }
   color: var(--text-main);
   margin-bottom: 2rem;
   letter-spacing: -0.02em;
-  position: relative;
-  display: inline-block;
 }
 
-.page-title::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 40px;
-  height: 4px;
-  background: var(--primary);
-  border-radius: 2px;
+/* Floating Bottom/Pill Nav Control (Inspired by Screenshot 1) */
+.floating-pill {
+  background: #111827;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  display: inline-flex;
+  gap: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
+.floating-pill-item {
+  color: #6b7280;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.floating-pill-item:hover, .floating-pill-item.active {
+  color: white;
+  background: rgba(255,255,255,0.1);
+}
+
+/* Segmented Control (Inspired by Screenshot 1) */
+.segmented-control {
+  background: var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem;
+  display: inline-flex;
+  gap: 0.25rem;
+}
+.segment-item {
+  padding: 0.5rem 1.5rem;
+  border-radius: calc(var(--radius-sm) - 0.25rem);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  color: var(--text-muted);
+}
+.segment-item.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 
 /* Badges */
 .badge {
