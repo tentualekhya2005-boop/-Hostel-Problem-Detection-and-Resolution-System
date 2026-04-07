@@ -83,18 +83,35 @@ router.post('/mark', protect, async (req, res) => {
 });
 
 // @route   GET /api/attendance/daily-report
-// @desc    Admin gets attendance report for today
+// @desc    Admin gets attendance report for today with absentees
 // @access  Admin
 router.get('/daily-report', protect, admin, async (req, res) => {
     try {
         const todayDate = new Date().toISOString().split('T')[0];
-        const reports = await Attendance.find({ date: todayDate }).populate('studentId', 'name roomNumber year block');
+        const allStudents = await User.find({ role: 'student' }).select('name roomNumber year block email');
+        const presentRecords = await Attendance.find({ date: todayDate }).populate('studentId', 'name roomNumber year block');
         
-        // Count Present vs Total students
-        const presentCount = reports.length;
-        const totalStudents = await User.countDocuments({ role: 'student' });
+        const presentIds = presentRecords.map(r => r.studentId?._id ? r.studentId._id.toString() : '');
+        
+        // Find absentees
+        const absentees = allStudents.filter(s => !presentIds.includes(s._id.toString()));
 
-        res.json({ date: todayDate, presentCount, totalStudents, reports });
+        // Year-wise stats
+        const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+        const yearStats = years.map(y => {
+            const total = allStudents.filter(s => s.year === y).length;
+            const present = presentRecords.filter(r => r.studentId?.year === y).length;
+            return { year: y, present, total };
+        });
+
+        res.json({ 
+            date: todayDate, 
+            presentCount: presentRecords.length, 
+            totalStudents: allStudents.length, 
+            presentRecords, 
+            absentees,
+            yearStats 
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

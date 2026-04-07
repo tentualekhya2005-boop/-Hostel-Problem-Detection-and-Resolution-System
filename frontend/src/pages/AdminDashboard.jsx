@@ -29,7 +29,10 @@ const AdminDashboard = () => {
     total: 0, pending: 0, assigned: 0, resolved: 0,
     year1: 0, year2: 0, year3: 0, year4: 0 
   });
-  const [attendanceData, setAttendanceData] = useState({ presentCount: 0, totalStudents: 0, reports: [] });
+  const [attendanceData, setAttendanceData] = useState({ 
+    presentCount: 0, totalStudents: 0, presentRecords: [], absentees: [], yearStats: [] 
+  });
+  const [attendanceSubTab, setAttendanceSubTab] = useState('present'); // 'present' or 'absent'
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
@@ -223,45 +226,100 @@ const AdminDashboard = () => {
       </div>
 
       {location.pathname === '/attendance-report' ? (
-        <div className="card animate-fade-in">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Daily Summary ({attendanceData.date})</h2>
-              <p className="text-muted">Tracking students within 200m hostel geofence</p>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--primary)' }}>{attendanceData.presentCount} / {attendanceData.totalStudents}</div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>STUDENTS PRESENT</div>
-            </div>
+        <div className="animate-fade-in">
+          {/* Year-wise summary cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+            {(attendanceData.yearStats || []).map(stat => (
+              <div key={stat.year} className="card" style={{ padding: '1.5rem', textAlign: 'center', borderBottom: '4px solid var(--primary)' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>{stat.year}</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                  {stat.present} <span style={{ color: 'var(--text-muted)', fontSize: '1.2rem', fontWeight: 500 }}>/ {stat.total}</span>
+                </div>
+                <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '3px', marginTop: '1rem', overflow: 'hidden' }}>
+                    <div style={{ width: `${(stat.present / (stat.total || 1)) * 100}%`, height: '100%', background: 'var(--gradient-btn)' }} />
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>Student Name</th>
-                  <th>Room / Block</th>
-                  <th>Year</th>
-                  <th>Check-in Time</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendanceData.reports.length > 0 ? (
-                  attendanceData.reports.map((r) => (
-                    <tr key={r._id}>
-                      <td><div style={{ fontWeight: 700 }}>{r.studentId?.name}</div></td>
-                      <td>{r.studentId?.roomNumber} / <span style={{ color: 'var(--plum)' }}>{r.studentId?.block}</span></td>
-                      <td>{r.studentId?.year}</td>
-                      <td>{new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                      <td><span className="badge badge-resolved">✅ Present</span></td>
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button 
+                    onClick={() => setAttendanceSubTab('present')}
+                    className={`btn ${attendanceSubTab === 'present' ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ borderRadius: '0.75rem', padding: '0.6rem 1.5rem' }}
+                >
+                    ✅ Present Sheet
+                </button>
+                <button 
+                    onClick={() => setAttendanceSubTab('absent')}
+                    className={`btn ${attendanceSubTab === 'absent' ? 'btn-danger' : 'btn-secondary'}`}
+                    style={{ 
+                        borderRadius: '0.75rem', padding: '0.6rem 1.5rem',
+                        background: attendanceSubTab === 'absent' ? '#ef4444' : '',
+                        color: attendanceSubTab === 'absent' ? 'white' : ''
+                    }}
+                >
+                    ❌ Absent Sheet
+                </button>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>{attendanceData.date}</div>
+                <div style={{ fontSize: '1rem', fontWeight: 800 }}>Overall: {attendanceData.presentCount} / {attendanceData.totalStudents}</div>
+              </div>
+            </div>
+
+            <div className="table-responsive">
+              <table>
+                <thead>
+                  {attendanceSubTab === 'present' ? (
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Room / Block</th>
+                      <th>Year</th>
+                      <th>Check-in Time</th>
                     </tr>
-                  ))
-                ) : (
-                  <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>No attendance records found for today.</td></tr>
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Room / Block</th>
+                      <th>Year</th>
+                      <th>Contact Email</th>
+                    </tr>
+                  )}
+                </thead>
+                <tbody>
+                  {attendanceSubTab === 'present' ? (
+                    (attendanceData.presentRecords || []).length > 0 ? (
+                      attendanceData.presentRecords.map((r) => (
+                        <tr key={r._id}>
+                          <td><div style={{ fontWeight: 700 }}>{r.studentId?.name}</div></td>
+                          <td>{r.studentId?.roomNumber} / {r.studentId?.block}</td>
+                          <td>{r.studentId?.year}</td>
+                          <td><div className="badge badge-resolved" style={{fontSize:'0.7rem'}}>{new Date(r.timestamp).toLocaleTimeString()}</div></td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: '3rem' }}>No present students recorded yet today.</td></tr>
+                    )
+                  ) : (
+                    (attendanceData.absentees || []).length > 0 ? (
+                      attendanceData.absentees.map((s) => (
+                        <tr key={s._id}>
+                          <td><div style={{ fontWeight: 700, color: '#ef4444' }}>{s.name}</div></td>
+                          <td>{s.roomNumber} / {s.block}</td>
+                          <td>{s.year}</td>
+                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.email}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: '3rem' }}>All students have marked attendance! ✅</td></tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       ) : (
