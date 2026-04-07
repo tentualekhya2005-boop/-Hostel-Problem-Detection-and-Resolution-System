@@ -17,6 +17,9 @@ const StudentDashboard = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('electrical');
+  const [year, setYear] = useState('1st Year');
+  const [block, setBlock] = useState('Nagavalli');
+  const [floor, setFloor] = useState('');
   const [image, setImage] = useState(null);
 
   const getFullImageUrl = (url) => {
@@ -115,6 +118,9 @@ const StudentDashboard = () => {
     formData.append('title', title);
     formData.append('description', description);
     formData.append('category', category);
+    formData.append('year', year);
+    formData.append('block', block);
+    formData.append('floor', floor);
     if (image) formData.append('image', image);
 
     try {
@@ -126,6 +132,9 @@ const StudentDashboard = () => {
       toast.success('Complaint submitted successfully');
       setTitle('');
       setDescription('');
+      setYear('1st Year');
+      setBlock('Nagavalli');
+      setFloor('');
       setImage(null);
       fetchMyComplaints();
     } catch (error) {
@@ -146,21 +155,55 @@ const StudentDashboard = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">{t('title')}</label>
-              <input type="text" className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} required />
+              <input type="text" className="form-input" placeholder="e.g. Fan not working" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
-            <div className="form-group">
-              <label className="form-label">{t('category')}</label>
-              <select className="form-select" value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="electrical">Electrical</option>
-                <option value="plumbing">Plumbing</option>
-                <option value="carpentry">Carpentry</option>
-                <option value="cleaning">Cleaning</option>
-                <option value="other">Other</option>
-              </select>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">{t('category')}</label>
+                <select className="form-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <option value="electrical">⚡ Electrical</option>
+                  <option value="plumbing">🔧 Plumbing</option>
+                  <option value="carpentry">🪵 Carpentry</option>
+                  <option value="cleaning">🧹 Cleaning</option>
+                  <option value="other">📌 Other</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Your Year</label>
+                <select className="form-select" value={year} onChange={(e) => setYear(e.target.value)}>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                </select>
+              </div>
             </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Block / Hostel</label>
+                <select className="form-select" value={block} onChange={(e) => setBlock(e.target.value)}>
+                  <option value="Nagavalli">🏢 Nagavalli</option>
+                  <option value="Vamsadara">🏢 Vamsadara</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Floor Number</label>
+                <select className="form-select" value={floor} onChange={(e) => setFloor(e.target.value)}>
+                  <option value="">-- Select Floor --</option>
+                  <option value="Ground Floor">Ground Floor</option>
+                  <option value="1st Floor">1st Floor</option>
+                  <option value="2nd Floor">2nd Floor</option>
+                  <option value="3rd Floor">3rd Floor</option>
+                  <option value="4th Floor">4th Floor</option>
+                </select>
+              </div>
+            </div>
+
             <div className="form-group">
               <label className="form-label">{t('description')}</label>
-              <textarea className="form-textarea" rows="3" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
+              <textarea className="form-textarea" rows="3" placeholder="Describe the issue in detail..." value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
             </div>
             <div className="form-group">
               <label className="form-label">Attached Image (Optional)</label>

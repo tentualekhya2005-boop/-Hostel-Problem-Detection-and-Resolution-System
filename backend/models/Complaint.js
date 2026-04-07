@@ -10,6 +10,9 @@ const complaintSchema = new mongoose.Schema({
     status: { type: String, enum: ['Pending', 'Assigned', 'Needs Verification', 'Student Verified', 'Student Rejected', 'Resolved'], default: 'Pending' },
     assignedWorkerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     roomNumber: { type: String, required: true },
+    year: { type: String, enum: ['1st Year', '2nd Year', '3rd Year', '4th Year'], default: '1st Year' },
+    block: { type: String, enum: ['Nagavalli', 'Vamsadara'], default: 'Nagavalli' },
+    floor: { type: String, default: '' },
     isDeletedByStudent: { type: Boolean, default: false },
     isDeletedByWorker: { type: Boolean, default: false },
 }, { timestamps: true });

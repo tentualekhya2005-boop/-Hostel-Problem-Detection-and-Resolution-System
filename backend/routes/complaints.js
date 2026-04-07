@@ -71,7 +71,7 @@ router.post('/', protect, (req, res) => {
         }
 
         try {
-            const { title, description, category, roomNumber } = req.body;
+            const { title, description, category, roomNumber, year, block, floor } = req.body;
 
             // Get image URL from Cloudinary (or local disk fallback)
             const imageUrl = getImageUrl(req.file);
@@ -82,6 +82,9 @@ router.post('/', protect, (req, res) => {
                 description,
                 category,
                 roomNumber: roomNumber || req.user.roomNumber || 'Unknown',
+                year: year || '1st Year',
+                block: block || 'Nagavalli',
+                floor: floor || '',
                 imageUrl
             });
 

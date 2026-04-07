@@ -239,6 +239,8 @@ const AdminDashboard = () => {
                 <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
                   <th style={{ padding: '0.75rem' }}>Title</th>
                   <th style={{ padding: '0.75rem' }}>Student / Room</th>
+                  <th style={{ padding: '0.75rem' }}>Block & Floor</th>
+                  <th style={{ padding: '0.75rem' }}>Year</th>
                   <th style={{ padding: '0.75rem' }}>Category</th>
                   <th style={{ padding: '0.75rem' }}>Photos</th>
                   <th style={{ padding: '0.75rem' }}>Status</th>
@@ -250,6 +252,15 @@ const AdminDashboard = () => {
                   <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '0.75rem', fontWeight: 500 }}>{c.title}</td>
                     <td style={{ padding: '0.75rem' }}>{c.studentId?.name} ({c.roomNumber})</td>
+                    <td style={{ padding: '0.75rem' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '0.85rem' }}>{c.block || '—'}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{c.floor || 'Floor N/A'}</div>
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      <span style={{ fontSize: '0.8rem', background: 'var(--primary-light)', color: 'var(--primary)', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>
+                        {c.year || '—'}
+                      </span>
+                    </td>
                     <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
                     <td style={{ padding: '0.75rem' }}>
                       {c.imageUrl && (
