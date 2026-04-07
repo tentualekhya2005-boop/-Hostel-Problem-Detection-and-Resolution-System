@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -9,6 +10,7 @@ import html2canvas from 'html2canvas';
 
 const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
+  const location = useLocation();
   const [complaints, setComplaints] = useState([]);
   const [workers, setWorkers] = useState([]);
   
