@@ -14,16 +14,36 @@ const DashboardRouter = () => {
 
   if (!user) return <Navigate to="/login" />;
 
-  const renderDashboard = () => {
+  const getRoutes = () => {
     switch (user.role) {
       case 'student':
-        return <StudentDashboard />;
+        return (
+          <>
+            <Route path="/" element={<StudentDashboard />} />
+            <Route path="/complaints" element={<StudentDashboard />} />
+            <Route path="/menu" element={<StudentDashboard />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </>
+        );
       case 'admin':
-        return <AdminDashboard />;
+        return (
+          <>
+            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/admin-complaints" element={<AdminDashboard />} />
+            <Route path="/users" element={<AdminDashboard />} />
+            <Route path="/manage-menu" element={<AdminDashboard />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </>
+        );
       case 'worker':
-        return <WorkerDashboard />;
+        return (
+          <>
+            <Route path="/" element={<WorkerDashboard />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </>
+        );
       default:
-        return <div>Invalid role</div>;
+        return <Route path="*" element={<div>Invalid role</div>} />;
     }
   };
 
@@ -34,9 +54,7 @@ const DashboardRouter = () => {
         <Header user={user} />
         <div className="content-area">
           <Routes>
-            <Route path="/" element={renderDashboard()} />
-            {/* Additional shared or specific routes can go here */}
-            <Route path="*" element={<Navigate to="/" />} />
+            {getRoutes()}
           </Routes>
         </div>
       </div>

@@ -73,15 +73,6 @@ router.post('/', protect, (req, res) => {
         try {
             const { title, description, category, roomNumber } = req.body;
 
-            // AI Severity Prediction (Keyword based)
-            const textToAnalyze = `${title} ${description}`.toLowerCase();
-            let severity = 'Medium';
-            if (textToAnalyze.includes('flood') || textToAnalyze.match(/water.*(everywhere|room|leak)/) || textToAnalyze.includes('fire') || textToAnalyze.includes('short circuit') || textToAnalyze.includes('urgent') || textToAnalyze.includes('emergency') || textToAnalyze.includes('smoke') || textToAnalyze.includes('spark')) {
-                severity = 'High';
-            } else if (textToAnalyze.includes('bulb') || textToAnalyze.includes('dust') || textToAnalyze.includes('dirty') || textToAnalyze.includes('sweeping') || textToAnalyze.includes('small')) {
-                severity = 'Low';
-            }
-
             // Get image URL from Cloudinary (or local disk fallback)
             const imageUrl = getImageUrl(req.file);
 
@@ -90,7 +81,6 @@ router.post('/', protect, (req, res) => {
                 title,
                 description,
                 category,
-                severity,
                 roomNumber: roomNumber || req.user.roomNumber || 'Unknown',
                 imageUrl
             });
@@ -152,13 +142,6 @@ router.get('/student', protect, async (req, res) => {
 // @access  Admin
 router.get('/all', protect, admin, async (req, res) => {
     try {
-        // Automatic SLA Escalation Check
-        const now = new Date();
-        await Complaint.updateMany(
-            { status: { $in: ['Pending', 'Assigned'] }, slaDeadline: { $lt: now }, isDelayed: false },
-            { $set: { isDelayed: true, status: 'Delayed', escalationLevel: 2 } }
-        );
-
         const complaints = await Complaint.find({})
             .populate('studentId', 'name email roomNumber')
             .populate('assignedWorkerId', 'name')
@@ -266,14 +249,6 @@ router.put('/:id/resolve', protect, worker, (req, res) => {
 
                 complaint.status = 'Needs Verification';
                 complaint.resolvedImageUrl = resolvedImageUrl;
-                
-                if (req.body.latitude && req.body.longitude && req.body.timestamp) {
-                   complaint.workerImageMeta = {
-                       latitude: parseFloat(req.body.latitude),
-                       longitude: parseFloat(req.body.longitude),
-                       timestamp: new Date(req.body.timestamp)
-                   };
-                }
 
             const updatedComplaint = await complaint.save();
 
@@ -437,7 +412,8 @@ router.delete('/worker/:id', protect, worker, async (req, res) => {
         const complaint = await Complaint.findById(req.params.id);
 
         if (complaint && complaint.assignedWorkerId && complaint.assignedWorkerId.toString() === req.user._id.toString()) {
-            await Complaint.updateOne({ _id: complaint._id }, { $set: { isDeletedByWorker: true } });
+            complaint.isDeletedByWorker = true;
+            await complaint.save();
             res.json({ message: 'Complaint hidden for worker' });
         } else {
             res.status(404).json({ message: 'Complaint not found or unauthorized' });
@@ -473,33 +449,14 @@ router.delete('/:id', protect, async (req, res) => {
         const complaint = await Complaint.findById(req.params.id);
 
         if (complaint && complaint.studentId.toString() === req.user._id.toString()) {
-            await Complaint.updateOne({ _id: complaint._id }, { $set: { isDeletedByStudent: true } });
+            complaint.isDeletedByStudent = true;
+            await complaint.save();
             res.json({ message: 'Complaint hidden for student' });
         } else {
             res.status(404).json({ message: 'Complaint not found or unauthorized' });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
-    }
-});
-
-// @route   PUT /api/complaints/:id/upvote
-// @desc    Group upvote a complaint
-// @access  Student
-router.put('/:id/upvote', protect, async (req, res) => {
-    try {
-        const complaint = await Complaint.findById(req.params.id);
-        if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
-
-        if (complaint.upvotes.includes(req.user._id)) {
-            complaint.upvotes = complaint.upvotes.filter(id => id.toString() !== req.user._id.toString());
-        } else {
-            complaint.upvotes.push(req.user._id);
-        }
-        await complaint.save();
-        res.json(complaint);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
     }
 });
 

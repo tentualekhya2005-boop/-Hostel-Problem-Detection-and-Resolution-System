@@ -9,10 +9,7 @@ const userSchema = new mongoose.Schema({
     roomNumber: { type: String }, // For students
     skills: [{ type: String }], // For workers
     otp: { type: String },
-    otpExpires: { type: Date },
-    fingerprintId: { type: Number, unique: true, sparse: true }, // Hardware ID for ESP32
-    points: { type: Number, default: 0 }, // Gamification points
-    badges: [{ type: String }] // E.g., 'Active Reporter', 'Top Performer'
+    otpExpires: { type: Date }
 }, { timestamps: true });
 
 // Hash password before saving
