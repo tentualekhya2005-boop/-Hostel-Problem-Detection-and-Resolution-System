@@ -183,6 +183,25 @@ const AdminDashboard = () => {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ef4444'];
 
+  const generateInsights = () => {
+    if (complaints.length === 0) return ["No data available for insights."];
+    const insights = [];
+    
+    const rooms = complaints.reduce((acc, c) => { acc[c.roomNumber] = (acc[c.roomNumber] || 0) + 1; return acc; }, {});
+    const mostCommonRoom = Object.keys(rooms).reduce((a, b) => rooms[a] > rooms[b] ? a : b, '');
+    if (mostCommonRoom && rooms[mostCommonRoom] > 1) {
+      insights.push(`🔥 Most issues reported from Room ${mostCommonRoom} (${rooms[mostCommonRoom]} complaints)`);
+    }
+
+    const delayedCount = complaints.filter(c => c.isDelayed && c.status === 'Delayed').length;
+    if (delayedCount > 0) insights.push(`⚠️ ${delayedCount} tasks have exceeded their SLA limits (Delayed).`);
+
+    const highSev = complaints.filter(c => c.severity === 'High' && c.status !== 'Resolved').length;
+    if (highSev > 0) insights.push(`🚨 ${highSev} High Severity complaints require immediate attention.`);
+
+    return insights.length ? insights : ["All systems operating normally. No critical issues detected."];
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -193,6 +212,19 @@ const AdminDashboard = () => {
       </div>
 
       <div id="report-content" style={{ padding: '10px' }}>
+
+      {/* Admin AI Insights Panel */}
+      <div className="card" style={{ marginBottom: '2rem', background: 'linear-gradient(to right, #1e3a8a, #312e81)', color: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem' }}>
+          ✨ AI System Insights
+        </div>
+        <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.8' }}>
+          {generateInsights().map((insight, i) => (
+             <li key={i} style={{ fontSize: '1.1rem' }}>{insight}</li>
+          ))}
+        </ul>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         
         {/* Visual Analytics Widget */}
@@ -248,7 +280,13 @@ const AdminDashboard = () => {
               <tbody>
                 {complaints.map(c => (
                   <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: 500 }}>{c.title}</td>
+                    <td style={{ padding: '0.75rem', fontWeight: 500 }}>
+                       {c.title}
+                       <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                          {c.severity && <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: c.severity === 'High' ? '#fee2e2' : c.severity === 'Low' ? '#f0fdf4' : '#fff7ed', color: c.severity === 'High' ? '#ef4444' : c.severity === 'Low' ? '#22c55e' : '#f97316' }}>{c.severity}</span>}
+                          {c.isDelayed && <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#b91c1c' }}>SLA BREACHED</span>}
+                       </div>
+                    </td>
                     <td style={{ padding: '0.75rem' }}>{c.studentId?.name} ({c.roomNumber})</td>
                     <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
                     <td style={{ padding: '0.75rem' }}>

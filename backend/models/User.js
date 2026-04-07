@@ -9,7 +9,9 @@ const userSchema = new mongoose.Schema({
     roomNumber: { type: String }, // For students
     skills: [{ type: String }], // For workers
     otp: { type: String },
-    otpExpires: { type: Date }
+    otpExpires: { type: Date },
+    points: { type: Number, default: 0 }, // Gamification points
+    badges: [{ type: String }] // E.g., 'Active Reporter', 'Top Performer'
 }, { timestamps: true });
 
 // Hash password before saving

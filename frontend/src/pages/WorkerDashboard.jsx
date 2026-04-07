@@ -8,6 +8,7 @@ const WorkerDashboard = () => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [resolveImages, setResolveImages] = useState({});
+  const [resolvingId, setResolvingId] = useState(null);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
@@ -40,10 +41,21 @@ const WorkerDashboard = () => {
       return;
     }
 
+    setResolvingId(id);
     try {
       const formData = new FormData();
       if (resolveImages[id]) {
         formData.append('image', resolveImages[id]);
+      }
+
+      // Fake Image Detection (Geolocation)
+      if (navigator.geolocation) {
+         try {
+           const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+           formData.append('latitude', pos.coords.latitude);
+           formData.append('longitude', pos.coords.longitude);
+           formData.append('timestamp', new Date().toISOString());
+         } catch(e) { console.log('Geolocation denied or failed'); }
       }
 
       await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}/resolve`, formData, {
@@ -53,7 +65,11 @@ const WorkerDashboard = () => {
       });
       toast.success('Task marked as resolved!');
       fetchTasks();
-    } catch (error) { toast.error('Failed to resolve task'); }
+    } catch (error) { 
+      toast.error('Failed to resolve task'); 
+    } finally {
+      setResolvingId(null);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -119,11 +135,11 @@ const WorkerDashboard = () => {
                     />
                     <button 
                       className="btn btn-primary" 
-                      style={{ width: '100%', gap: '0.5rem', opacity: resolveImages[task._id] ? 1 : 0.5, cursor: resolveImages[task._id] ? 'pointer' : 'not-allowed' }}
-                      disabled={!resolveImages[task._id]}
+                      style={{ width: '100%', gap: '0.5rem', opacity: resolveImages[task._id] && resolvingId !== task._id ? 1 : 0.5, cursor: resolveImages[task._id] && resolvingId !== task._id ? 'pointer' : 'not-allowed' }}
+                      disabled={!resolveImages[task._id] || resolvingId === task._id}
                       onClick={() => handleResolve(task._id)}
                     >
-                      <CheckCircle size={18} /> Mark as Resolved
+                      <CheckCircle size={18} /> {resolvingId === task._id ? 'Uploading...' : 'Mark as Resolved'}
                     </button>
                   </div>
                 )}

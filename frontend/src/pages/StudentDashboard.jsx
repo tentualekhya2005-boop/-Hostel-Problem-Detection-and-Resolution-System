@@ -19,6 +19,7 @@ const StudentDashboard = () => {
   const [category, setCategory] = useState('electrical');
   const [image, setImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
@@ -110,6 +111,27 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Voice recognition not supported in your browser');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.onstart = () => setIsRecording(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setDescription(prev => prev + (prev ? ' ' : '') + transcript);
+    };
+    recognition.onerror = () => {
+      toast.error('Error capturing voice');
+      setIsRecording(false);
+    };
+    recognition.onend = () => setIsRecording(false);
+    recognition.start();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -163,7 +185,12 @@ const StudentDashboard = () => {
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">{t('description')}</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>{t('description')}</label>
+                <button type="button" onClick={handleVoiceInput} style={{ background: 'transparent', border: 'none', color: isRecording ? 'red' : 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
+                  🎤 {isRecording ? 'Recording...' : 'Voice Input'}
+                </button>
+              </div>
               <textarea className="form-textarea" rows="3" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
             </div>
             <div className="form-group">
@@ -257,6 +284,30 @@ const StudentDashboard = () => {
              </div>
           )}
 
+          {/* Student Analytics & Gamification Widget */}
+          <div className="card" style={{ background: 'linear-gradient(135deg, var(--glass-bg), var(--bg-main))', border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem', color: 'var(--text-main)' }}>
+               My Analytics & Badges
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-muted)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Total Complaints:</span> <strong>{complaints.length}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Resolved:</span> <strong>{complaints.filter(c => ['Student Verified', 'Resolved'].includes(c.status)).length}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Pending:</span> <strong>{complaints.filter(c => !['Student Verified', 'Resolved', 'Student Rejected'].includes(c.status)).length}</strong>
+              </div>
+              <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '0.875rem' }}>Badges:</span>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  {complaints.length > 5 ? <span className="badge badge-success">🏆 Active Reporter</span> : <span style={{ fontSize: '0.8rem' }}>Report 5 issues to get a badge!</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -279,9 +330,13 @@ const StudentDashboard = () => {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                       <strong style={{ color: 'var(--text-main)' }}>{comp.title}</strong>
-                      <span className={`badge badge-${comp.status.toLowerCase()}`}>{comp.status}</span>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {comp.severity && <span className={`badge`} style={{ backgroundColor: comp.severity === 'High' ? '#fee2e2' : comp.severity === 'Low' ? '#f0fdf4' : '#fff7ed', color: comp.severity === 'High' ? '#ef4444' : comp.severity === 'Low' ? '#22c55e' : '#f97316' }}>{comp.severity} Priority</span>}
+                        <span className={`badge badge-${comp.status.replace(/\s+/g, '-').toLowerCase()}`}>{comp.status}</span>
+                      </div>
                     </div>
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{comp.description}</p>
+                    {comp.isDelayed && <p style={{ fontSize: '0.75rem', color: 'red', fontWeight: 'bold' }}>⚠️ Delayed past SLA limits</p>}
                     
                     {comp.imageUrl && (
                       <div style={{ marginTop: '0.75rem' }}>
