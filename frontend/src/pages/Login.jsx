@@ -7,17 +7,23 @@ import { LogIn } from 'lucide-react';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await login(email, password);
-    if (res.success) {
-      toast.success('Logged in successfully');
-      navigate('/');
-    } else {
-      toast.error(res.message);
+    setIsLoading(true);
+    try {
+      const res = await login(email, password);
+      if (res.success) {
+        toast.success('Logged in successfully');
+        navigate('/');
+      } else {
+        toast.error(res.message);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,8 +66,8 @@ const Login = () => {
               required 
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Sign In
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isLoading}>
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
         

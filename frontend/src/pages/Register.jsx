@@ -11,6 +11,7 @@ const Register = () => {
     password: '',
     roomNumber: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
   
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -21,14 +22,19 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = { ...formData, role: 'student' }; // Implicitly register as student
-    const res = await register(payload);
-    
-    if (res.success) {
-      toast.success('Registration successful. Welcome!');
-      navigate('/');
-    } else {
-      toast.error(res.message);
+    setIsLoading(true);
+    try {
+      const payload = { ...formData, role: 'student' }; // Implicitly register as student
+      const res = await register(payload);
+      
+      if (res.success) {
+        toast.success('Registration successful. Welcome!');
+        navigate('/');
+      } else {
+        toast.error(res.message);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,8 +67,8 @@ const Register = () => {
             <input type="password" name="password" className="form-input" value={formData.password} onChange={handleChange} required minLength={6} autoComplete="new-password" />
           </div>
           
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Sign Up
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isLoading}>
+            {isLoading ? 'Signing Up...' : 'Sign Up'}
           </button>
         </form>
         
