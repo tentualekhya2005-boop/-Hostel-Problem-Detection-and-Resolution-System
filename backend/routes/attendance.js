@@ -5,10 +5,10 @@ const { protect, admin } = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
 // ─── CONFIGURATION ───
-// Hostel location (Nagavalli / Vamsadara region coordinates approx)
-const HOSTEL_LAT = parseFloat(process.env.HOSTEL_LAT || '17.6835'); 
-const HOSTEL_LON = parseFloat(process.env.HOSTEL_LON || '83.2185');
-const ALLOWED_RADIUS_METERS = parseInt(process.env.ALLOWED_RADIUS || '200'); // 200m range
+// Hostel location (GMRIT College Rajam coordinates)
+const HOSTEL_LAT = parseFloat(process.env.HOSTEL_LAT || '18.46646'); 
+const HOSTEL_LON = parseFloat(process.env.HOSTEL_LON || '83.66078');
+const ALLOWED_RADIUS_METERS = parseInt(process.env.ALLOWED_RADIUS || '300'); // 300m range for college campus
 
 // ─── Helper: Distance Calculator (Haversine) ───
 const getDistanceInMeters = (lat1, lon1, lat2, lon2) => {
