@@ -288,8 +288,18 @@ const AdminDashboard = () => {
                         </div>
                       )}
                       {c.resolvedImageUrl && (
-                        <div>
-                          <a href={getFullImageUrl(c.resolvedImageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)'}}>✅ Resolved Photo</a>
+                        <div style={{ position: 'relative' }}>
+                          <a href={getFullImageUrl(c.resolvedImageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)', fontWeight: 600}}>✅ Resolved Photo</a>
+                          {c.isSuspicious && (
+                            <div title={c.suspicionReason} style={{ 
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              marginLeft: '8px', padding: '2px 8px', borderRadius: '4px',
+                              backgroundColor: '#fee2e2', color: '#ef4444', fontSize: '0.65rem',
+                              fontWeight: 800, border: '1px solid #fecaca', cursor: 'help'
+                            }}>
+                              ⚠️ SUSPICIOUS
+                            </div>
+                          )}
                         </div>
                       )}
                     </td>

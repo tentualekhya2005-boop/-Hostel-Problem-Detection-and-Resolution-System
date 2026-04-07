@@ -10,6 +10,7 @@ const Notification = require('../models/Notification');
 const { protect, admin, worker } = require('../middleware/authMiddleware');
 const cloudinary = require('../utils/cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const ExifReader = require('exifreader');
 
 
 // Use Cloudinary storage if credentials are set, otherwise memory storage (fallback)
@@ -235,7 +236,11 @@ router.get('/worker', protect, worker, async (req, res) => {
 // @desc    Worker marks complaint as resolved and uploads proof photo
 // @access  Worker
 router.put('/:id/resolve', protect, worker, (req, res) => {
-    upload.single('image')(req, res, async (err) => {
+    // For resolution, we always use memory storage temporarily to check EXIF 
+    // before syncing to Cloudinary/Disk
+    const memUpload = multer({ storage: multer.memoryStorage() }).single('image');
+
+    memUpload(req, res, async (err) => {
         if (err) {
             console.error("MULTER RESOLVE ERROR:", err.message || err);
             return res.status(500).json({ message: err.message || 'Multer upload error' });
@@ -249,44 +254,126 @@ router.put('/:id/resolve', protect, worker, (req, res) => {
                     return res.status(400).json({ message: 'A completion photo is required to resolve this task' });
                 }
 
-                const resolvedImageUrl = getImageUrl(req.file);
+                // ─── FAKE IMAGE DETECTION (BASIC) ───
+                let isSuspicious = false;
+                let suspicionReason = '';
+                let photoTimestamp = null;
+                let photoLocation = '';
+
+                try {
+                    const tags = ExifReader.load(req.file.buffer);
+                    
+                    // 1. Check DateTaken (Time stamp)
+                    if (tags['DateTimeOriginal']) {
+                        const dateStr = tags['DateTimeOriginal'].description;
+                        // Format: "YYYY:MM:DD HH:MM:SS"
+                        const [datePart, timePart] = dateStr.split(' ');
+                        const normalizedDate = datePart.replace(/:/g, '-') + 'T' + timePart;
+                        photoTimestamp = new Date(normalizedDate);
+                        
+                        // If photo was taken more than 1 hour ago, it's suspicious for a live task
+                        const now = new Date();
+                        const diffInMinutes = (now - photoTimestamp) / (1000 * 60);
+                        if (diffInMinutes > 60) {
+                            isSuspicious = true;
+                            suspicionReason += 'Photo taken too long ago (pre-taken). ';
+                        }
+                    } else {
+                        // isSuspicious = true; // No timestamp is suspicious but common in some phones/apps
+                        // suspicionReason += 'No original timestamp found in photo metadata. ';
+                    }
+
+                    // 2. Check Software (Screen shots usually have software names)
+                    if (tags['Software']) {
+                        const software = tags['Software'].description.toLowerCase();
+                        if (software.includes('screenshot') || software.includes('snagit') || software.includes('adobe')) {
+                            isSuspicious = true;
+                            suspicionReason += 'Image appears to be a screenshot or edited. ';
+                        }
+                    }
+
+                    // 3. Location match (Conceptual)
+                    if (tags['GPSLatitude'] && tags['GPSLongitude']) {
+                        photoLocation = `${tags['GPSLatitude'].description}, ${tags['GPSLongitude'].description}`;
+                        // Here you could compare with hostel GPS coordinates if known
+                    }
+
+                } catch (exifErr) {
+                    console.log('Exif analysis skipped (no tags or not a JPEG)');
+                }
+
+                // ─── UPLOAD TO CLOUDINARY MANUALLY ───
+                let resolvedImageUrl = '';
+                try {
+                    // Convert buffer to data URI for Cloudinary
+                    const fileContent = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+                    const result = await cloudinary.uploader.upload(fileContent, {
+                        folder: 'hostel-complaints/resolutions',
+                    });
+                    resolvedImageUrl = result.secure_url;
+                } catch (uploadErr) {
+                    // Fallback to local if Cloudinary fails
+                    const fileName = Date.now() + '-' + req.file.originalname;
+                    const uploadDir = path.join(__dirname, '../uploads');
+                    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+                    fs.writeFileSync(path.join(uploadDir, fileName), req.file.buffer);
+                    resolvedImageUrl = `/uploads/${fileName}`;
+                }
 
                 complaint.status = 'Needs Verification';
                 complaint.resolvedImageUrl = resolvedImageUrl;
+                
+                // Save suspicion info
+                complaint.isSuspicious = isSuspicious;
+                complaint.suspicionReason = suspicionReason || 'Verified live photo';
+                complaint.photoTimestamp = photoTimestamp;
+                complaint.photoLocation = photoLocation;
 
-            const updatedComplaint = await complaint.save();
+                const updatedComplaint = await complaint.save();
 
-            // Notify student to verify
-            try {
-                const studentUser = await User.findById(complaint.studentId);
-                if (studentUser) {
-                    sendEmailNotification({
-                        to: studentUser.email,
-                        subject: `Action Required: Verify Complaint Resolution (${complaint.title})`,
-                        text: `Your complaint has been marked as resolved by the assigned worker.\n\nPlease log in to your dashboard to view the completion photo and verify whether the issue is actually resolved. If it's not resolved, you can reject it.`
-                    });
+                // Notify student to verify
+                try {
+                    const studentUser = await User.findById(complaint.studentId);
+                    if (studentUser) {
+                        sendEmailNotification({
+                            to: studentUser.email,
+                            subject: `Action Required: Verify Complaint Resolution (${complaint.title})`,
+                            text: `Your complaint has been marked as resolved by the assigned worker.\n\nPlease log in to your dashboard to view the completion photo and verify whether the issue is actually resolved. If it's not resolved, you can reject it.`
+                        });
 
-                    // In-app notification for student
-                    await Notification.create({
-                        userId: complaint.studentId,
-                        title: '🎉 Your Problem is Solved!',
-                        message: `The worker has completed the task for your complaint "${complaint.title}". Please check your dashboard to verify and confirm.`,
-                        type: 'complaint_resolved',
-                        complaintId: complaint._id
-                    });
-                }
-            } catch (emailErr) {
-                console.error("Failed to send email", emailErr);
+                        // In-app notification for student
+                        await Notification.create({
+                            userId: complaint.studentId,
+                            title: '🎉 Your Problem is Solved!',
+                            message: `The worker has completed the task for your complaint "${complaint.title}". Please check your dashboard to verify and confirm.`,
+                            type: 'complaint_resolved',
+                            complaintId: complaint._id
+                        });
+                    }
+
+                    // If SUSPICIOUS, notify Admins quietly
+                    if (isSuspicious) {
+                        const admins = await User.find({ role: 'admin' });
+                        for (let adminUser of admins) {
+                            await Notification.create({
+                                userId: adminUser._id,
+                                title: '⚠️ Suspicious Proof Detected',
+                                message: `Worker uploaded a suspicious proof photo for task "${complaint.title}". Reason: ${suspicionReason}`,
+                                type: 'suspicious_activity',
+                                complaintId: complaint._id
+                            });
+                        }
+                    }
+                } catch (notifErr) { }
+
+                res.json(updatedComplaint);
+            } else {
+                res.status(404).json({ message: 'Complaint not found or unauthorized' });
             }
-
-            res.json(updatedComplaint);
-        } else {
-            res.status(404).json({ message: 'Complaint not found or unauthorized' });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-    }); // Close upload callback
+    }); // Close memUpload callback
 });
 
 // @route   PUT /api/complaints/:id/verify-resolution

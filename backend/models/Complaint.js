@@ -15,6 +15,10 @@ const complaintSchema = new mongoose.Schema({
     floor: { type: String, default: '' },
     isDeletedByStudent: { type: Boolean, default: false },
     isDeletedByWorker: { type: Boolean, default: false },
+    isSuspicious: { type: Boolean, default: false },
+    suspicionReason: { type: String, default: '' },
+    photoTimestamp: { type: Date },
+    photoLocation: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Complaint', complaintSchema);
