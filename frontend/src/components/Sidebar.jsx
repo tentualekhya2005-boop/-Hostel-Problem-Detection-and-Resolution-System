@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, List, Utensils, Users, Wrench, User, LogOut, Radio, Music, Heart, Menu } from 'lucide-react';
+import { Home, List, Utensils, Users, Wrench, User, LogOut, Radio, Music, Heart, Menu, Fingerprint } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
