@@ -140,4 +140,36 @@ router.get('/my-rating/:date', protect, async (req, res) => {
     } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+// Admin stats: Aggregated ratings for the last 7 days
+router.get('/ratings/weekly', protect, admin, async (req, res) => {
+    try {
+        const history = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+            
+            const ratings = await MenuRating.find({ date: dateStr });
+            const menu = await Menu.findOne({ date: { $gte: new Date(dateStr), $lte: new Date(dateStr + 'T23:59:59') } });
+            
+            if (menu) {
+                ['breakfast', 'lunch', 'snacks', 'dinner'].forEach(m => {
+                    const valid = ratings.filter(r => r[m] > 0);
+                    const avg = valid.length > 0 ? (valid.reduce((s, c) => s + c[m], 0) / (valid.length * 5)) * 100 : null;
+                    if (avg !== null) {
+                        history.push({
+                            meal: m.charAt(0).toUpperCase() + m.slice(1),
+                            dish: menu[m],
+                            date: dateStr,
+                            satisfaction: Math.round(avg),
+                            count: valid.length
+                        });
+                    }
+                });
+            }
+        }
+        res.json(history);
+    } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 module.exports = router;

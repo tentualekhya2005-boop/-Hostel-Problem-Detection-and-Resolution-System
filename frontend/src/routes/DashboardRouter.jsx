@@ -10,6 +10,8 @@ import AdminDashboard from '../pages/AdminDashboard';
 import WorkerDashboard from '../pages/WorkerDashboard';
 import AttendancePage from '../pages/AttendancePage';
 import FavoritesPage from '../pages/FavoritesPage';
+import MenuFeedbackPage from '../pages/MenuFeedbackPage';
+import FoodAnalyticsPage from '../pages/FoodAnalyticsPage';
 
 const DashboardRouter = () => {
   const { user } = useContext(AuthContext);
@@ -24,6 +26,7 @@ const DashboardRouter = () => {
             <Route path="/" element={<StudentDashboard />} />
             <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/menu-feedback" element={<MenuFeedbackPage />} />
             <Route path="/complaints" element={<StudentDashboard />} />
             <Route path="/menu" element={<StudentDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />
@@ -33,7 +36,9 @@ const DashboardRouter = () => {
         return (
           <>
             <Route path="/" element={<AdminDashboard />} />
-            <Route path="/attendance-report" element={<AdminDashboard />} />
+             <Route path="/attendance-report" element={<AdminDashboard />} />
+            <Route path="/food-analytics" element={<FoodAnalyticsPage />} />
+            <Route path="/hostel-stats" element={<AdminDashboard />} />
             <Route path="/admin-complaints" element={<AdminDashboard />} />
             <Route path="/users" element={<AdminDashboard />} />
             <Route path="/manage-menu" element={<AdminDashboard />} />

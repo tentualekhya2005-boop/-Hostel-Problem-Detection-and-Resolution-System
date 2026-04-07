@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, List, Utensils, Users, Wrench, User, LogOut, Radio, Music, Heart, Menu, Fingerprint } from 'lucide-react';
+import { Home, List, Utensils, Users, Wrench, User, LogOut, Radio, Music, Heart, Menu, Fingerprint, Grid, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
@@ -16,13 +16,15 @@ const Sidebar = ({ role }) => {
           { name: t('dashboard'), path: '/', icon: <Home size={22} /> },
           { name: 'Daily Attendance', path: '/attendance', icon: <Fingerprint size={22} /> },
           { name: t('my_complaints'), path: '/complaints', icon: <Radio size={22} /> },
-          { name: t('todays_menu'), path: '/menu', icon: <Utensils size={22} /> },
+          { name: 'Menu Feedback', path: '/menu-feedback', icon: <Utensils size={22} /> },
           { name: 'My Favourites', path: '/favorites', icon: <Heart size={22} /> },
         ];
       case 'admin':
         return [
-          { name: t('dashboard'), path: '/', icon: <Home size={22} /> },
+          { name: 'Full Dashboard', path: '/', icon: <Grid size={22} /> },
+          { name: 'Food Analytics', path: '/food-analytics', icon: <Utensils size={22} /> },
           { name: 'Attendance Report', path: '/attendance-report', icon: <Fingerprint size={22} /> },
+          { name: 'Hostel Stats', path: '/hostel-stats', icon: <Activity size={22} /> },
           { name: t('all_complaints'), path: '/admin-complaints', icon: <List size={22} /> },
           { name: t('manage_users'), path: '/users', icon: <Users size={22} /> },
           { name: t('manage_menu'), path: '/manage-menu', icon: <Utensils size={22} /> },
