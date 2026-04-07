@@ -193,6 +193,14 @@ const AdminDashboard = () => {
     }
   };
 
+  const cardStats = {
+    total: complaints.length,
+    pending: complaints.filter(c => c.status === 'Pending').length,
+    assigned: complaints.filter(c => c.status === 'Assigned').length,
+    resolved: complaints.filter(c => c.status === 'Resolved').length,
+    needsVerification: complaints.filter(c => c.status === 'Needs Verification').length
+  };
+
   const categoryData = complaints.reduce((acc, comp) => {
     const cat = comp.category ? comp.category.charAt(0).toUpperCase() + comp.category.slice(1) : 'Other';
     const existing = acc.find(item => item.name === cat);
@@ -258,7 +266,30 @@ const AdminDashboard = () => {
         </div>
       ) : (
       <div id="report-content" style={{ padding: '10px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #4F46E5', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Total Complaints</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#4F46E5' }}>{cardStats.total}</div>
+          </div>
+          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #F59E0B', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Pending Actions</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#F59E0B' }}>{cardStats.pending}</div>
+          </div>
+          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #06B6D4', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>In Progress</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#06B6D4' }}>{cardStats.assigned}</div>
+          </div>
+          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #F472B6', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Needs Verification</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#F472B6' }}>{cardStats.needsVerification}</div>
+          </div>
+          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #10B981', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Closed / Resolved</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10B981' }}>{cardStats.resolved}</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         
         {/* Visual Analytics Widget */}
         <div className="card" style={{ gridColumn: '1 / -1' }}>
