@@ -9,6 +9,7 @@ import StudentDashboard from '../pages/StudentDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import WorkerDashboard from '../pages/WorkerDashboard';
 import AttendancePage from '../pages/AttendancePage';
+import FavoritesPage from '../pages/FavoritesPage';
 
 const DashboardRouter = () => {
   const { user } = useContext(AuthContext);
@@ -22,6 +23,7 @@ const DashboardRouter = () => {
           <>
             <Route path="/" element={<StudentDashboard />} />
             <Route path="/attendance" element={<AttendancePage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/complaints" element={<StudentDashboard />} />
             <Route path="/menu" element={<StudentDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />

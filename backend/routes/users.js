@@ -47,4 +47,37 @@ router.post('/worker', protect, admin, async (req, res) => {
     }
 });
 
+// @route   GET /api/users/me
+// @desc    Get current user profile
+// @access  Private
+router.get('/me', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Profile error" });
+    }
+});
+
+// @route   PUT /api/users/favorites
+// @desc    Toggle favorite item
+// @access  Private
+router.put('/favorites', protect, async (req, res) => {
+    try {
+        const { item } = req.body;
+        const user = await User.findById(req.user._id);
+        
+        if (user.favorites.includes(item)) {
+            user.favorites = user.favorites.filter(f => f !== item);
+        } else {
+            user.favorites.push(item);
+        }
+        
+        await user.save();
+        res.json(user.favorites);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;

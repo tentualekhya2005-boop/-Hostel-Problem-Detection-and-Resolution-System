@@ -17,7 +17,7 @@ const Sidebar = ({ role }) => {
           { name: 'Daily Attendance', path: '/attendance', icon: <Fingerprint size={22} /> },
           { name: t('my_complaints'), path: '/complaints', icon: <Radio size={22} /> },
           { name: t('todays_menu'), path: '/menu', icon: <Utensils size={22} /> },
-          { name: 'My Favourites', path: '#', icon: <Heart size={22} /> },
+          { name: 'My Favourites', path: '/favorites', icon: <Heart size={22} /> },
         ];
       case 'admin':
         return [

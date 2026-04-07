@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3 } from 'lucide-react';
+import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3, Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const StudentDashboard = () => {
@@ -12,6 +12,7 @@ const StudentDashboard = () => {
   const [complaints, setComplaints] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [stats, setStats] = useState(null);
+  const [userFavorites, setUserFavorites] = useState([]);
   
   // New Complaint Form State
   const [title, setTitle] = useState('');
@@ -35,7 +36,32 @@ const StudentDashboard = () => {
     fetchMyComplaints();
     fetchAnnouncements();
     fetchStats();
+    fetchUserFavorites();
   }, []);
+
+  const fetchUserFavorites = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/me`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setUserFavorites(data.favorites || []);
+    } catch (e) { }
+  };
+
+  const toggleFavorite = async (item) => {
+    if (!item) return;
+    try {
+      const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/favorites`, { item }, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setUserFavorites(data);
+      const isNowFav = data.includes(item);
+      toast.info(isNowFav ? `${item} added to Favourites!` : `${item} removed`, { 
+        icon: isNowFav ? "❤️" : "🗑️",
+        position: 'bottom-right' 
+      });
+    } catch (e) { toast.error("Action failed"); }
+  };
 
   const fetchStats = async () => {
     try {
@@ -223,10 +249,19 @@ const StudentDashboard = () => {
             </div>
             {menu ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem', fontSize: '0.875rem' }}>
-                <div><strong>Breakfast:</strong> <br/>{menu.breakfast}</div>
-                <div><strong>Lunch:</strong> <br/>{menu.lunch}</div>
-                <div><strong>Snacks:</strong> <br/>{menu.snacks}</div>
-                <div><strong>Dinner:</strong> <br/>{menu.dinner}</div>
+                {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
+                  <div key={meal} style={{ position: 'relative', padding: '0.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <strong style={{ textTransform: 'capitalize' }}>{meal}:</strong>
+                      <Heart 
+                        size={18} 
+                        style={{ cursor: 'pointer', fill: userFavorites.includes(menu[meal]) ? 'white' : 'transparent', transition: 'all 0.2s' }}
+                        onClick={() => toggleFavorite(menu[meal])}
+                      />
+                    </div>
+                    <div style={{ marginTop: '0.25rem' }}>{menu[meal]}</div>
+                  </div>
+                ))}
               </div>
             ) : (
               <p>Menu has not been updated for today.</p>

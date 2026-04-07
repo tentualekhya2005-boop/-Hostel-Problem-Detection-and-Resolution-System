@@ -7,7 +7,10 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { type: String, enum: ['student', 'admin', 'worker'], default: 'student' },
     roomNumber: { type: String }, // For students
+    year: { type: String, enum: ['1st Year', '2nd Year', '3rd Year', '4th Year'], default: '1st Year' },
+    block: { type: String, enum: ['Nagavalli', 'Vamsadara'], default: 'Nagavalli' },
     skills: [{ type: String }], // For workers
+    favorites: [{ type: String }], // Quick heart items (meals)
     otp: { type: String },
     otpExpires: { type: Date }
 }, { timestamps: true });
