@@ -67,6 +67,8 @@ router.put('/favorites', protect, async (req, res) => {
         const { item } = req.body;
         const user = await User.findById(req.user._id);
         
+        if (!user.favorites) user.favorites = [];
+        
         if (user.favorites.includes(item)) {
             user.favorites = user.favorites.filter(f => f !== item);
         } else {
