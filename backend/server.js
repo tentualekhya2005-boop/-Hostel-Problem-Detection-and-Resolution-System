@@ -13,6 +13,7 @@ const app = express();
 // Allow requests from Netlify, localhost (dev), and any other origins
 const allowedOrigins = [
     'https://hostel12345.netlify.app',
+    'https://hostel-problem-detection-and-resolu.vercel.app',
     'http://localhost:5173',
     'http://localhost:3000',
 ];
@@ -75,7 +76,6 @@ const userRoutes = require('./routes/users');
 const notificationRoutes = require('./routes/notifications');
 const announcementRoutes = require('./routes/announcements');
 const statsRoutes = require('./routes/stats');
-const attendanceRoutes = require('./routes/attendance');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
@@ -84,7 +84,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/stats', statsRoutes);
-app.use('/api/attendance', attendanceRoutes);
 
 app.get('/', (req, res) => {
     res.json({ message: 'Hostel Portal API v2 ✅ (Cloudinary enabled)' });
