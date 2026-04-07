@@ -86,7 +86,7 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/stats', statsRoutes);
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Hostel Portal API v2 ✅ (Cloudinary enabled)' });
+    res.json({ message: 'Hostel Portal API v3 ✅ (year + block + floor fields enabled)' });
 });
 
 // ─── 404 handler ──────────────────────────────────────────────────────────────

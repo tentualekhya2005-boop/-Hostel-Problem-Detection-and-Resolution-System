@@ -72,6 +72,7 @@ router.post('/', protect, (req, res) => {
 
         try {
             const { title, description, category, roomNumber, year, block, floor } = req.body;
+            console.log('📋 New complaint fields received:', { title, category, year, block, floor, roomNumber });
 
             // Get image URL from Cloudinary (or local disk fallback)
             const imageUrl = getImageUrl(req.file);
