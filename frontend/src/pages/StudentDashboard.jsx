@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3, Heart } from 'lucide-react';
+import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3, Heart, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const StudentDashboard = () => {
@@ -13,6 +13,7 @@ const StudentDashboard = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [stats, setStats] = useState(null);
   const [userFavorites, setUserFavorites] = useState([]);
+  const [myRatings, setMyRatings] = useState({});
   
   // New Complaint Form State
   const [title, setTitle] = useState('');
@@ -37,33 +38,29 @@ const StudentDashboard = () => {
     fetchAnnouncements();
     fetchStats();
     fetchUserFavorites();
+    fetchMyTodayRating();
   }, []);
 
-  const fetchUserFavorites = async () => {
+  const fetchMyTodayRating = async () => {
+    const today = new Date().toISOString().split('T')[0];
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/me`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/my-rating/${today}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      setUserFavorites(data.favorites || []);
+      setMyRatings(data);
     } catch (e) { }
   };
 
-  const toggleFavorite = async (item) => {
-    if (!item) return;
+  const handleRate = async (meal, rating) => {
+    const today = new Date().toISOString().split('T')[0];
     try {
-      const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/favorites`, { item }, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/rate`, { date: today, meal, rating }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      setUserFavorites(data);
-      const isNowFav = data.includes(item);
-      toast.info(isNowFav ? `${item} added to Favourites!` : `${item} removed`, { 
-        icon: isNowFav ? "❤️" : "🗑️",
-        position: 'bottom-right' 
-      });
-    } catch (e) { toast.error("Action failed"); }
+      setMyRatings(prev => ({ ...prev, [meal]: rating }));
+      toast.success(`${meal.charAt(0).toUpperCase() + meal.slice(1)} rated ${rating}★`, { position: 'bottom-right' });
+    } catch (e) { toast.error("Rating failed"); }
   };
-
-  const fetchStats = async () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
         headers: { Authorization: `Bearer ${user.token}` }
@@ -102,6 +99,30 @@ const StudentDashboard = () => {
     } catch (error) {
        console.log("No menu found for today");
     }
+  };
+
+  const toggleFavorite = async (item) => {
+    if (!item) return;
+    try {
+      const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/favorites`, { item }, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setUserFavorites(data);
+      const isNowFav = data.includes(item);
+      toast.info(isNowFav ? `${item} added to Favourites!` : `${item} removed`, { 
+        icon: isNowFav ? "❤️" : "🗑️",
+        position: 'bottom-right' 
+      });
+    } catch (e) { toast.error("Action failed"); }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setStats(data);
+    } catch (error) { console.log('Failed to load stats'); }
   };
 
   const fetchMyComplaints = async () => {
@@ -259,7 +280,19 @@ const StudentDashboard = () => {
                         onClick={() => toggleFavorite(menu[meal])}
                       />
                     </div>
-                    <div style={{ marginTop: '0.25rem' }}>{menu[meal]}</div>
+                    <div style={{ marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{menu[meal]}</div>
+                    <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.2rem' }}>
+                      {[1,2,3,4,5].map(star => (
+                        <Star 
+                          key={star} 
+                          size={14} 
+                          fill={star <= (myRatings[meal] || 0) ? 'gold' : 'transparent'}
+                          stroke={star <= (myRatings[meal] || 0) ? 'gold' : 'rgba(255,255,255,0.4)'}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => handleRate(meal, star)}
+                        />
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>

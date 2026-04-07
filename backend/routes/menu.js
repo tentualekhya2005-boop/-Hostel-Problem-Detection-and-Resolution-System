@@ -93,4 +93,51 @@ router.get('/date/:date', protect, async (req, res) => {
     }
 });
 
+const MenuRating = require('../models/MenuRating');
+
+// Rate menu items
+router.post('/rate', protect, async (req, res) => {
+    try {
+        const { date, meal, rating } = req.body;
+        let record = await MenuRating.findOne({ userId: req.user._id, date });
+        
+        if (record) {
+            record[meal] = rating;
+        } else {
+            record = new MenuRating({ 
+                userId: req.user._id, 
+                date,
+                [meal]: rating 
+            });
+        }
+        await record.save();
+        res.status(201).json(record);
+    } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// Admin stats: Aggregated ratings for today
+router.get('/ratings/today', protect, admin, async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const ratings = await MenuRating.find({ date: today });
+        
+        const meals = ['breakfast', 'lunch', 'snacks', 'dinner'];
+        const stats = meals.map(m => {
+            const valid = ratings.filter(r => r[m] > 0);
+            const sum = valid.reduce((acc, current) => acc + current[m], 0);
+            const avg = valid.length > 0 ? (sum / (valid.length * 5)) * 100 : 0;
+            return { name: m.charAt(0).toUpperCase() + m.slice(1), value: Math.round(avg) };
+        });
+        res.json(stats);
+    } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// Get user's rating for a specific date
+router.get('/my-rating/:date', protect, async (req, res) => {
+    try {
+        const record = await MenuRating.findOne({ userId: req.user._id, date: req.params.date });
+        res.json(record || {});
+    } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 module.exports = router;

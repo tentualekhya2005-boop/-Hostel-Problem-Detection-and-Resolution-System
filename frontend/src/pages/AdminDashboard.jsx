@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { Users, UserPlus, AlertTriangle, Calendar, Bell, BarChart3, Download, PieChart as PieChartIcon } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -33,6 +33,7 @@ const AdminDashboard = () => {
     presentCount: 0, totalStudents: 0, presentRecords: [], absentees: [], yearStats: [] 
   });
   const [attendanceSubTab, setAttendanceSubTab] = useState('present'); // 'present' or 'absent'
+  const [menuRatings, setMenuRatings] = useState([]);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
@@ -46,10 +47,20 @@ const AdminDashboard = () => {
     fetchComplaints();
     fetchStats();
     fetchWorkers();
+    fetchMenuRatings();
     if (location.pathname === '/attendance-report') {
       fetchAttendance();
     }
   }, [location.pathname]);
+
+  const fetchMenuRatings = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/ratings/today`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setMenuRatings(data);
+    } catch (e) { console.log('No ratings yet'); }
+  };
 
   const fetchAttendance = async () => {
     try {
@@ -347,37 +358,60 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
-        
-        {/* Visual Analytics Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+          {/* Complaint Analytics */}
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+              <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
+            </div>
+            <div style={{ width: '100%', height: 300 }}>
+              {complaints.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={categoryData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-muted)' }}>No complaints recorded yet.</p>
+              )}
+            </div>
           </div>
-          <div style={{ width: '100%', height: 300, display: 'flex', justifyContent: 'center' }}>
-            {complaints.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p style={{ alignSelf: 'center', color: 'var(--text-muted)' }}>No complaints recorded yet.</p>
-            )}
+
+          {/* Menu Ratings Analytics */}
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+              <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction Score (%)
+            </div>
+            <div style={{ width: '100%', height: 300 }}>
+              {menuRatings.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={menuRatings} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12}} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12}} unit="%" />
+                    <RechartsTooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                    <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={40} />
+                    <defs>
+                      <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#9B5DE5" />
+                        <stop offset="100%" stopColor="#F15BB5" />
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-muted)' }}>
+                  <p>No student ratings for today yet.</p>
+                  <p style={{fontSize: '0.8rem', marginTop: '0.5rem'}}>Averages will appear once students rate meals.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
@@ -617,7 +651,6 @@ const AdminDashboard = () => {
           </form>
         </div>
 
-      </div>
       </div>
       )}
     </div>
