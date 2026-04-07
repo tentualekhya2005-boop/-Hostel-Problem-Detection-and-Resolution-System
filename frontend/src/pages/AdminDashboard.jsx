@@ -238,8 +238,10 @@ const AdminDashboard = () => {
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
                   <th style={{ padding: '0.75rem' }}>Title</th>
-                  <th style={{ padding: '0.75rem' }}>Student / Room</th>
-                  <th style={{ padding: '0.75rem' }}>Block & Floor</th>
+                  <th style={{ padding: '0.75rem' }}>Student</th>
+                  <th style={{ padding: '0.75rem' }}>Room No.</th>
+                  <th style={{ padding: '0.75rem' }}>Block</th>
+                  <th style={{ padding: '0.75rem' }}>Floor</th>
                   <th style={{ padding: '0.75rem' }}>Year</th>
                   <th style={{ padding: '0.75rem' }}>Category</th>
                   <th style={{ padding: '0.75rem' }}>Photos</th>
@@ -250,16 +252,33 @@ const AdminDashboard = () => {
               <tbody>
                 {complaints.map(c => (
                   <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: 500 }}>{c.title}</td>
-                    <td style={{ padding: '0.75rem' }}>{c.studentId?.name} ({c.roomNumber})</td>
+                    <td style={{ padding: '0.75rem', fontWeight: 600, maxWidth: '130px' }}>{c.title}</td>
                     <td style={{ padding: '0.75rem' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '0.85rem' }}>{c.block || '—'}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{c.floor || 'Floor N/A'}</div>
+                      <div style={{ fontWeight: 500 }}>{c.studentId?.name || 'Unknown'}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.studentId?.email || ''}</div>
                     </td>
                     <td style={{ padding: '0.75rem' }}>
-                      <span style={{ fontSize: '0.8rem', background: 'var(--primary-light)', color: 'var(--primary)', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>
-                        {c.year || '—'}
+                      <span style={{ background: 'var(--primary-light)', color: 'var(--primary-dark)', padding: '0.2rem 0.65rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}>
+                        {c.roomNumber || 'N/A'}
                       </span>
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      {c.block
+                        ? <span style={{ fontWeight: 600, color: 'var(--plum)', fontSize: '0.85rem' }}>{c.block}</span>
+                        : <span style={{ fontSize: '0.75rem', color: '#B0A0B5', fontStyle: 'italic' }}>Not provided</span>
+                      }
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      {c.floor
+                        ? <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{c.floor}</span>
+                        : <span style={{ fontSize: '0.75rem', color: '#B0A0B5', fontStyle: 'italic' }}>Not provided</span>
+                      }
+                    </td>
+                    <td style={{ padding: '0.75rem' }}>
+                      {c.year
+                        ? <span style={{ fontSize: '0.8rem', background: 'var(--secondary-light)', color: 'var(--secondary-dark)', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>{c.year}</span>
+                        : <span style={{ fontSize: '0.75rem', color: '#B0A0B5', fontStyle: 'italic' }}>Not provided</span>
+                      }
                     </td>
                     <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
                     <td style={{ padding: '0.75rem' }}>

@@ -89,6 +89,30 @@ const WorkerDashboard = () => {
                 
                 <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-main)' }}>{task.title}</h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', flex: 1, marginBottom: '1rem' }}>{task.description}</p>
+
+                {/* Location Details */}
+                <div style={{ 
+                  display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', 
+                  backgroundColor: 'var(--primary-light)', borderRadius: '0.65rem',
+                  padding: '0.85rem', marginBottom: '1rem'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Room No.</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-dark)' }}>{task.roomNumber || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Block</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--plum)' }}>{task.block || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Year</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--secondary-dark)' }}>{task.year || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Floor</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{task.floor || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                  </div>
+                </div>
                 
                 {task.imageUrl && (
                   <div style={{ marginBottom: '1rem' }}>
