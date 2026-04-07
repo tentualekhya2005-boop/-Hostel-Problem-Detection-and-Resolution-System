@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     skills: [{ type: String }], // For workers
     otp: { type: String },
     otpExpires: { type: Date },
+    fingerprintId: { type: Number, unique: true, sparse: true }, // Hardware ID for ESP32
     points: { type: Number, default: 0 }, // Gamification points
     badges: [{ type: String }] // E.g., 'Active Reporter', 'Top Performer'
 }, { timestamps: true });
