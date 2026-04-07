@@ -437,8 +437,7 @@ router.delete('/worker/:id', protect, worker, async (req, res) => {
         const complaint = await Complaint.findById(req.params.id);
 
         if (complaint && complaint.assignedWorkerId && complaint.assignedWorkerId.toString() === req.user._id.toString()) {
-            complaint.isDeletedByWorker = true;
-            await complaint.save();
+            await Complaint.updateOne({ _id: complaint._id }, { $set: { isDeletedByWorker: true } });
             res.json({ message: 'Complaint hidden for worker' });
         } else {
             res.status(404).json({ message: 'Complaint not found or unauthorized' });
@@ -474,8 +473,7 @@ router.delete('/:id', protect, async (req, res) => {
         const complaint = await Complaint.findById(req.params.id);
 
         if (complaint && complaint.studentId.toString() === req.user._id.toString()) {
-            complaint.isDeletedByStudent = true;
-            await complaint.save();
+            await Complaint.updateOne({ _id: complaint._id }, { $set: { isDeletedByStudent: true } });
             res.json({ message: 'Complaint hidden for student' });
         } else {
             res.status(404).json({ message: 'Complaint not found or unauthorized' });

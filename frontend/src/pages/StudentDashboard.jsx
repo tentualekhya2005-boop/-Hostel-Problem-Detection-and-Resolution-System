@@ -107,7 +107,7 @@ const StudentDashboard = () => {
       toast.success('Complaint deleted successfully');
       fetchMyComplaints();
     } catch (error) {
-      toast.error('Failed to delete complaint');
+      toast.error(`Delete failed: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -417,10 +417,10 @@ const StudentDashboard = () => {
                           {new Date(comp.createdAt).toLocaleDateString()}
                         </div>
                         <button 
-                          style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
                           onClick={() => handleDelete(comp._id)}
                         >
-                          View Details →
+                          Clear Complaint ×
                         </button>
                       </div>
                     </div>

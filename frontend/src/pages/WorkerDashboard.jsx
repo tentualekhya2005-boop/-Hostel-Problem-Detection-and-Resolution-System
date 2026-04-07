@@ -80,7 +80,9 @@ const WorkerDashboard = () => {
       });
       toast.success('Task removed from dashboard');
       fetchTasks();
-    } catch (error) { toast.error('Failed to remove task'); }
+    } catch (error) { 
+      toast.error(`Failed to remove task: ${error.response?.data?.message || error.message}`); 
+    }
   };
 
   return (
