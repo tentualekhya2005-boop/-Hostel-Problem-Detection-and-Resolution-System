@@ -38,14 +38,11 @@ const DashboardRouter = () => {
         return (
           <>
             <Route path="/" element={<AdminDashboard />} />
-            <Route path="/attendance-report" element={<AdminDashboard />} />
+             <Route path="/attendance-report" element={<AdminDashboard />} />
             <Route path="/food-analytics" element={<FoodAnalyticsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/hostel-stats" element={<AdminDashboard />} />
             <Route path="/admin-complaints" element={<AdminDashboard />} />
-            <Route path="/admin-complaints/pending" element={<AdminDashboard />} />
-            <Route path="/admin-complaints/assigned" element={<AdminDashboard />} />
-            <Route path="/admin-complaints/resolved" element={<AdminDashboard />} />
             <Route path="/users" element={<AdminDashboard />} />
             <Route path="/manage-menu" element={<AdminDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />
@@ -55,8 +52,6 @@ const DashboardRouter = () => {
         return (
           <>
             <Route path="/" element={<WorkerDashboard />} />
-            <Route path="/worker-tasks/pending" element={<WorkerDashboard />} />
-            <Route path="/worker-tasks/resolved" element={<WorkerDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         );

@@ -25,7 +25,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/*" element={
+          <Route index element={
+            <PrivateRoute>
+              <DashboardRouter />
+            </PrivateRoute>
+          } />
+          <Route path="*" element={
             <PrivateRoute>
               <DashboardRouter />
             </PrivateRoute>

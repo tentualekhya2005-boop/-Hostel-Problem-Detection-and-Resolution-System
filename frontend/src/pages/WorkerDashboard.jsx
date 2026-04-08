@@ -1,13 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
-import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Wrench, CheckCircle, Trash2, Clock } from 'lucide-react';
+import { Wrench, CheckCircle, Trash2 } from 'lucide-react';
 
 const WorkerDashboard = () => {
   const { user } = useContext(AuthContext);
-  const location = useLocation();
   const [tasks, setTasks] = useState([]);
   const [resolveImages, setResolveImages] = useState({});
 
@@ -18,8 +16,6 @@ const WorkerDashboard = () => {
     const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/['"]/g, '').replace(/\/$/, '');
     return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
   };
-
-
 
   useEffect(() => {
     fetchTasks();
@@ -43,11 +39,17 @@ const WorkerDashboard = () => {
       toast.error('You must attach a completion photo first!');
       return;
     }
+
     try {
       const formData = new FormData();
-      formData.append('image', resolveImages[id]);
+      if (resolveImages[id]) {
+        formData.append('image', resolveImages[id]);
+      }
+
       await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}/resolve`, formData, {
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers: { 
+          Authorization: `Bearer ${user.token}`
+        }
       });
       toast.success('Task marked as resolved!');
       fetchTasks();
@@ -60,77 +62,112 @@ const WorkerDashboard = () => {
       await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/worker/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      toast.success('Task removed');
+      toast.success('Task removed from dashboard');
       fetchTasks();
     } catch (error) { toast.error('Failed to remove task'); }
   };
 
-  const renderTaskCard = (task) => (
-    <div key={task._id} className="card animate-fade-in" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <span className={`badge badge-${task.status.toLowerCase()}`}>{task.status}</span>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700 }}>Rm {task.roomNumber}</span>
-      </div>
-      
-      <div>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem' }}>{task.title}</h3>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{task.description}</p>
-      </div>
-
-      <div style={{ background: 'var(--primary-light)', borderRadius: '12px', padding: '0.75rem', fontSize: '0.8rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-        <div><span style={{color:'var(--text-muted)'}}>Block:</span> <strong>{task.block || 'N/A'}</strong></div>
-        <div><span style={{color:'var(--text-muted)'}}>Floor:</span> <strong>{task.floor || 'N/A'}</strong></div>
-      </div>
-
-      {task.imageUrl && <a href={getFullImageUrl(task.imageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize: '0.8rem'}}>View Student Photo</a>}
-      
-      {task.status === 'Assigned' && (
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-          <input type="file" className="form-input" onChange={(e) => handleImageChange(task._id, e.target.files[0])} style={{fontSize: '0.75rem', padding: '0.4rem'}} />
-          <button className="btn btn-primary" onClick={() => handleResolve(task._id)} disabled={!resolveImages[task._id]} style={{width: '100%', opacity: resolveImages[task._id] ? 1 : 0.6}}>
-            <CheckCircle size={18} /> Resolve Task
-          </button>
-        </div>
-      )}
-
-      {task.status !== 'Assigned' && (
-        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-          <span className="text-success" style={{fontSize: '0.8rem', fontWeight: 700}}>✅ Completed</span>
-          <button onClick={() => handleDelete(task._id)} style={{color: '#ef4444', background: 'none', border:'none', cursor:'pointer'}}><Trash2 size={16}/></button>
-        </div>
-      )}
-    </div>
-  );
-
-  const filteredTasks = () => {
-    if (location.pathname === '/worker-tasks/pending') return tasks.filter(t => t.status === 'Assigned');
-    if (location.pathname === '/worker-tasks/resolved') return tasks.filter(t => t.status === 'Resolved' || t.status === 'Needs Verification');
-    return tasks;
-  };
-
-  const renderContent = () => {
-    const currentTasks = filteredTasks();
-
-    return (
-      <div className="grid-responsive">
-        {currentTasks.length === 0 ? (
-          <div className="card" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem' }}>
-            <Clock size={48} color="var(--border)" style={{ marginBottom: '1rem' }} />
-            <p className="text-muted">No tasks found in this section.</p>
-          </div>
-        ) : (
-          currentTasks.map(renderTaskCard)
-        )}
-      </div>
-    );
-  };
-
   return (
     <div>
-      <h1 className="page-title" style={{ textTransform: 'capitalize' }}>
-        {location.pathname === '/' ? 'Worker Dashboard' : location.pathname.split('/').pop().replace(/-/g, ' ')}
-      </h1>
-      {renderContent()}
+      <h1 className="page-title">Worker Dashboard</h1>
+      
+      <div className="card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1.25rem' }}>
+          <Wrench size={24} /> My Assigned Tasks
+        </div>
+
+        {tasks.length === 0 ? (
+          <p className="text-muted">You have no assigned tasks right now.</p>
+        ) : (
+          <div className="grid-responsive">
+            {tasks.map(task => (
+              <div key={task._id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span className={`badge badge-${task.status.toLowerCase()}`}>{task.status}</span>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Room: <strong>{task.roomNumber}</strong></span>
+                </div>
+                
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-main)' }}>{task.title}</h3>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', flex: 1, marginBottom: '1rem' }}>{task.description}</p>
+
+                {/* Location Details */}
+                <div style={{ 
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '0.5rem', 
+                  backgroundColor: 'var(--primary-light)', borderRadius: '0.65rem',
+                  padding: '0.85rem', marginBottom: '1rem'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Room No.</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-dark)' }}>{task.roomNumber || 'N/A'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Block</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--plum)' }}>{task.block || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Year</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--secondary-dark)' }}>{task.year || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Floor</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{task.floor || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                  </div>
+                </div>
+                
+                {task.imageUrl && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <a href={getFullImageUrl(task.imageUrl)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>View Student's Attached Image</a>
+                  </div>
+                )}
+
+                {task.resolvedImageUrl && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <strong style={{ display: 'block', fontSize: '0.875rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Your Resolution Photo:</strong>
+                    <img 
+                      src={getFullImageUrl(task.resolvedImageUrl)} 
+                      alt="Resolved" 
+                      style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem', border: '1px solid var(--border)' }} 
+                    />
+                  </div>
+                )}
+                
+                {task.status === 'Assigned' && (
+                  <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Upload Completion Photo:</label>
+                    <input 
+                      type="file" 
+                      className="form-input" 
+                      accept="image/*" 
+                      onChange={(e) => handleImageChange(task._id, e.target.files[0])}
+                      style={{ padding: '0.5rem', marginBottom: '0.5rem' }}
+                    />
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ width: '100%', gap: '0.5rem', opacity: resolveImages[task._id] ? 1 : 0.5, cursor: resolveImages[task._id] ? 'pointer' : 'not-allowed' }}
+                      disabled={!resolveImages[task._id]}
+                      onClick={() => handleResolve(task._id)}
+                    >
+                      <CheckCircle size={18} /> Mark as Resolved
+                    </button>
+                  </div>
+                )}
+
+                {task.status !== 'Assigned' && (
+                  <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                      onClick={() => handleDelete(task._id)}
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

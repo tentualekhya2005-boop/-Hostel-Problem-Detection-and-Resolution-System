@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3, Heart, Star } from 'lucide-react';
+import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3, Star, Grid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const StudentDashboard = () => {
@@ -298,9 +298,9 @@ const StudentDashboard = () => {
                         <div key={idx} style={{ borderBottom: idx < arr.length - 1 ? '1px dashed rgba(255,255,255,0.2)' : 'none', paddingBottom: '0.25rem' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                             <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{itemName}</span>
-                            <Heart 
+                            <Grid 
                               size={14} 
-                              style={{ cursor: 'pointer', fill: userFavorites.includes(itemName) ? 'white' : 'transparent', transition: 'all 0.2s' }}
+                              style={{ cursor: 'pointer', color: userFavorites.includes(itemName) ? 'var(--primary)' : 'rgba(255,255,255,0.4)', transition: 'all 0.2s' }}
                               onClick={() => toggleFavorite(itemName)}
                             />
                           </div>

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Menu = require('../models/Menu');
-const { protect, admin, staff } = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 // @route   POST /api/menu
 // @desc    Admin sets or updates menu for a specific date
@@ -130,7 +130,7 @@ router.post('/rate', protect, async (req, res) => {
 
 // Admin stats: Aggregated ratings for today
 // Admin stats: Aggregated ratings for today (item-level)
-router.get('/ratings/today', protect, staff, async (req, res) => {
+router.get('/ratings/today', protect, admin, async (req, res) => {
     try {
         const today = new Date().toISOString().split('T')[0];
         const ratings = await MenuRating.find({ date: today });

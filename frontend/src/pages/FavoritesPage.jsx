@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Heart, Trash2, Utensils, Music } from 'lucide-react';
+import { Grid, Trash2, Utensils, Music } from 'lucide-react';
 
 const FavoritesPage = () => {
     const { user } = useContext(AuthContext);
@@ -50,7 +50,7 @@ const FavoritesPage = () => {
             {favorites.length === 0 ? (
                 <div className="card" style={{ padding: '5rem', textAlign: 'center' }}>
                     <div style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-                        <Heart size={64} color="#E2E8F0" />
+                        <Grid size={64} color="#E2E8F0" />
                     </div>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>No favorites yet</h2>
                     <p className="text-muted">Heart items in the Daily Menu to see them here.</p>
