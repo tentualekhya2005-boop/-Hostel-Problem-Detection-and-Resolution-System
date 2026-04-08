@@ -78,13 +78,13 @@ const ReportsPage = () => {
                     </h3>
                     <div style={{ width: '100%', height: 300 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={[...reportData].sort((a,b) => b.avgStars - a.avgStars).slice(0, 15)}>
+                            <BarChart data={reportData.length > 0 ? [...reportData].sort((a,b) => b.avgStars - a.avgStars).slice(0, 15) : []}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="dish" tick={{fontSize: 10}} height={60} interval={0} angle={-30} textAnchor="end" />
                                 <YAxis domain={[0, 5]} />
                                 <Tooltip />
                                 <Bar dataKey="avgStars" name="Average Stars">
-                                    {reportData.map((entry, index) => (
+                                    {(reportData.length > 0 ? [...reportData].sort((a,b) => b.avgStars - a.avgStars).slice(0, 15) : []).map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.avgStars < 3 ? '#ef4444' : '#10b981'} />
                                     ))}
                                 </Bar>

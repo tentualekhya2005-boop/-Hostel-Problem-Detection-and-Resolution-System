@@ -58,7 +58,7 @@ const MenuFeedbackPage = () => {
             // Update local state
             setWeekHistory(prev => prev.map(day => {
                 if (day.date === date) {
-                    const newRatings = { ...day.ratings };
+                    const newRatings = day.ratings ? { ...day.ratings } : {};
                     const items = [...(newRatings.itemRatings || [])];
                     const idx = items.findIndex(i => i.itemName === itemName);
                     if (idx > -1) items[idx].rating = rating;
@@ -99,16 +99,16 @@ const MenuFeedbackPage = () => {
                                     <div style={{ color: 'var(--primary)', fontWeight: 800, marginBottom: '1rem', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em' }}>{meal}</div>
                                     
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                        {(day.menu[meal] || '').split(',').map((item, itemIdx) => {
+                                        {(day.menu[meal] || '').split(',').map((item, itemIdx, arr) => {
                                             const itemName = item.trim();
                                             if (!itemName) return null;
                                             
                                             // Find rating for this specific item in itemRatings
-                                            const itemRatingObj = (day.ratings.itemRatings || []).find(ir => ir.itemName === itemName);
-                                            const currentRating = itemRatingObj ? itemRatingObj.rating : (day.ratings[meal] || 0);
+                                            const itemRatingObj = (day.ratings?.itemRatings || []).find(ir => ir.itemName === itemName);
+                                            const currentRating = itemRatingObj ? itemRatingObj.rating : (day.ratings?.[meal] || 0);
 
                                             return (
-                                                <div key={itemIdx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: itemIdx < (day.menu[meal].split(',').length - 1) ? '1px dashed #e2e8f0' : 'none' }}>
+                                                <div key={itemIdx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: itemIdx < arr.length - 1 ? '1px dashed #e2e8f0' : 'none' }}>
                                                     <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-main)' }}>{itemName}</span>
                                                     <div style={{ display: 'flex', gap: '0.25rem' }}>
                                                         {[1,2,3,4,5].map(star => (

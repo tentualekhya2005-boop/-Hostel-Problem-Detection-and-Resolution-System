@@ -58,7 +58,7 @@ const StudentDashboard = () => {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       
-      const newRatings = { ...myRatings };
+      const newRatings = myRatings ? { ...myRatings } : {};
       const items = [...(newRatings.itemRatings || [])];
       const idx = items.findIndex(i => i.itemName === itemName);
       if (idx > -1) items[idx].rating = rating;
@@ -276,15 +276,15 @@ const StudentDashboard = () => {
                   <div key={meal} style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', opacity: 0.9 }}>{meal}</div>
                     
-                    {(menu[meal] || '').split(',').map((item, idx) => {
+                    {(menu[meal] || '').split(',').map((item, idx, arr) => {
                       const itemName = item.trim();
                       if (!itemName) return null;
                       
-                      const itemRatingObj = (myRatings.itemRatings || []).find(ir => ir.itemName === itemName);
-                      const currentRating = itemRatingObj ? itemRatingObj.rating : (myRatings[meal] || 0);
+                      const itemRatingObj = (myRatings?.itemRatings || []).find(ir => ir.itemName === itemName);
+                      const currentRating = itemRatingObj ? itemRatingObj.rating : (myRatings?.[meal] || 0);
 
                       return (
-                        <div key={idx} style={{ borderBottom: idx < (menu[meal].split(',').length -1) ? '1px dashed rgba(255,255,255,0.2)' : 'none', paddingBottom: '0.25rem' }}>
+                        <div key={idx} style={{ borderBottom: idx < arr.length - 1 ? '1px dashed rgba(255,255,255,0.2)' : 'none', paddingBottom: '0.25rem' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                             <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{itemName}</span>
                             <Heart 
@@ -468,6 +468,6 @@ const StudentDashboard = () => {
       </div>
     </div>
   );
-}
+};
 
 export default StudentDashboard;
