@@ -12,8 +12,10 @@ import AttendancePage from '../pages/AttendancePage';
 import FavoritesPage from '../pages/FavoritesPage';
 import MenuFeedbackPage from '../pages/MenuFeedbackPage';
 import FoodAnalyticsPage from '../pages/FoodAnalyticsPage';
-
 import ReportsPage from '../pages/ReportsPage';
+import WorkerRegistrationPage from '../pages/WorkerRegistrationPage';
+import AnnouncementPage from '../pages/AnnouncementPage';
+import UpdatePage from '../pages/UpdatePage';
 
 const DashboardRouter = () => {
   const { user } = useContext(AuthContext);
@@ -32,8 +34,6 @@ const DashboardRouter = () => {
             <Route path="/complaints/pending" element={<StudentDashboard filterStatus="Pending" />} />
             <Route path="/complaints/assigned" element={<StudentDashboard filterStatus="Assigned" />} />
             <Route path="/complaints/resolved" element={<StudentDashboard filterStatus="Resolved" />} />
-            <Route path="/complaints" element={<StudentDashboard />} />
-            <Route path="/menu" element={<StudentDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         );
@@ -45,12 +45,11 @@ const DashboardRouter = () => {
             <Route path="/admin/complaints/pending" element={<AdminDashboard filterStatus="Pending" />} />
             <Route path="/admin/complaints/assigned" element={<AdminDashboard filterStatus="Assigned" />} />
             <Route path="/admin/complaints/resolved" element={<AdminDashboard filterStatus="Resolved" />} />
+            <Route path="/admin/workers" element={<WorkerRegistrationPage />} />
+            <Route path="/admin/announcement" element={<AnnouncementPage />} />
+            <Route path="/admin/update" element={<UpdatePage />} />
             <Route path="/food-analytics" element={<FoodAnalyticsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/hostel-stats" element={<AdminDashboard />} />
-            <Route path="/admin-complaints" element={<AdminDashboard />} />
-            <Route path="/users" element={<AdminDashboard />} />
-            <Route path="/manage-menu" element={<AdminDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         );

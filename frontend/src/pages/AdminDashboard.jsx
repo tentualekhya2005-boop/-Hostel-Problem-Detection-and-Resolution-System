@@ -227,14 +227,136 @@ const AdminDashboard = ({ filterStatus }) => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">{location.pathname === '/attendance-report' ? 'Attendance Report' : 'Admin Dashboard'}</h1>
-        {location.pathname !== '/attendance-report' && (
-          <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <Download size={20} /> Export Report to PDF
-          </button>
-        )}
-      </div>
+      {/* ─── FILTERED COMPLAINT VIEW (Pending / Assigned / Resolved) ─── */}
+      {filterStatus ? (
+        <div className="animate-fade-in">
+          <header style={{ marginBottom: '2rem' }}>
+            <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <AlertTriangle size={28} color="var(--primary)" />
+              {filterStatus} Complaints
+            </h1>
+            <p className="text-muted">
+              {filterStatus === 'Pending' && 'Complaints waiting to be assigned to a worker.'}
+              {filterStatus === 'Assigned' && 'Complaints currently being worked on by maintenance staff.'}
+              {filterStatus === 'Resolved' && 'Complaints that have been resolved or are pending final verification.'}
+            </p>
+          </header>
+
+          {/* Mini stat strip */}
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            {[
+              { label: 'Showing', value: complaints.filter(c => {
+                  if (filterStatus === 'Pending') return c.status === 'Pending';
+                  if (filterStatus === 'Assigned') return c.status === 'Assigned';
+                  if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification', 'Student Rejected'].includes(c.status);
+                  return false;
+                }).length, color: 'var(--primary)' },
+              { label: 'Total All', value: complaints.length, color: 'var(--text-muted)' },
+            ].map(s => (
+              <div key={s.label} style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '0.65rem', padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: s.color }}>{s.value}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="card">
+            <div className="table-responsive">
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
+                    <th style={{ padding: '0.75rem' }}>Title</th>
+                    <th style={{ padding: '0.75rem' }}>Student</th>
+                    <th style={{ padding: '0.75rem' }}>Room No.</th>
+                    <th style={{ padding: '0.75rem' }}>Block</th>
+                    <th style={{ padding: '0.75rem' }}>Floor</th>
+                    <th style={{ padding: '0.75rem' }}>Year</th>
+                    <th style={{ padding: '0.75rem' }}>Category</th>
+                    <th style={{ padding: '0.75rem' }}>Photos</th>
+                    <th style={{ padding: '0.75rem' }}>Status</th>
+                    <th style={{ padding: '0.75rem' }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {complaints.filter(c => {
+                    if (filterStatus === 'Pending') return c.status === 'Pending';
+                    if (filterStatus === 'Assigned') return c.status === 'Assigned';
+                    if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification', 'Student Rejected'].includes(c.status);
+                    return false;
+                  }).length === 0 ? (
+                    <tr><td colSpan={10} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                      No {filterStatus.toLowerCase()} complaints found.
+                    </td></tr>
+                  ) : (
+                    complaints.filter(c => {
+                      if (filterStatus === 'Pending') return c.status === 'Pending';
+                      if (filterStatus === 'Assigned') return c.status === 'Assigned';
+                      if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification', 'Student Rejected'].includes(c.status);
+                      return false;
+                    }).map(c => (
+                      <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '0.75rem', fontWeight: 600, maxWidth: '130px' }}>{c.title}</td>
+                        <td style={{ padding: '0.75rem' }}>
+                          <div style={{ fontWeight: 500 }}>{c.studentId?.name || 'Unknown'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.studentId?.email || ''}</div>
+                        </td>
+                        <td style={{ padding: '0.75rem' }}>
+                          <span style={{ background: 'var(--primary-light)', color: 'var(--primary-dark)', padding: '0.2rem 0.65rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}>
+                            {c.roomNumber || 'N/A'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem' }}>{c.block || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontSize: '0.75rem' }}>N/A</span>}</td>
+                        <td style={{ padding: '0.75rem' }}>{c.floor || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontSize: '0.75rem' }}>N/A</span>}</td>
+                        <td style={{ padding: '0.75rem' }}>
+                          {c.year ? <span style={{ fontSize: '0.8rem', background: 'var(--secondary-light)', color: 'var(--secondary-dark)', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>{c.year}</span> : <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontSize: '0.75rem' }}>N/A</span>}
+                        </td>
+                        <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
+                        <td style={{ padding: '0.75rem' }}>
+                          {c.imageUrl && <div><a href={getFullImageUrl(c.imageUrl)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>📸 Issue Photo</a></div>}
+                          {c.resolvedImageUrl && <div><a href={getFullImageUrl(c.resolvedImageUrl)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>✅ Resolved Photo</a></div>}
+                        </td>
+                        <td style={{ padding: '0.75rem' }}>
+                          <span className={`badge badge-${c.status.toLowerCase().replace(/ /g, '-')}`}>{c.status}</span>
+                        </td>
+                        <td style={{ padding: '0.75rem' }}>
+                          <div style={{ display: 'flex', gap: '0.4rem', flexDirection: 'column' }}>
+                            {c.status === 'Pending' && (
+                              <select className="form-select" style={{ padding: '0.25rem', fontSize: '0.8rem' }} value={c.assignedWorkerId?._id || ''} onChange={e => handleAssignWorker(c._id, e.target.value)}>
+                                <option value="">Select Worker...</option>
+                                {workers.map(w => <option key={w._id} value={w._id}>{w.name} ({w.skills?.join(', ')})</option>)}
+                              </select>
+                            )}
+                            {c.status === 'Assigned' && <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>→ {c.assignedWorkerId?.name}</span>}
+                            {c.status === 'Resolved' && <span style={{ color: 'var(--success)', fontWeight: 700 }}>Finalized ✅</span>}
+                            {['Needs Verification', 'Student Verified', 'Student Rejected'].includes(c.status) && (
+                              <>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>→ {c.assignedWorkerId?.name}</span>
+                                <button className="btn btn-primary" style={{ padding: '0.2rem 0.4rem', fontSize: '0.72rem' }} onClick={() => handleAdminAction(c._id, 'Resolve')}>✅ Finalize</button>
+                                <button className="btn btn-secondary" style={{ padding: '0.2rem 0.4rem', fontSize: '0.72rem', backgroundColor: '#fecaca', color: '#991b1b', border: 'none' }} onClick={() => handleAdminAction(c._id, 'Reassign')}>❌ Reassign</button>
+                              </>
+                            )}
+                            <button className="btn btn-secondary" style={{ padding: '0.2rem 0.4rem', fontSize: '0.72rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171' }} onClick={() => handleAdminDelete(c._id)}>🗑️ Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : (
+      /* ─── FULL ADMIN DASHBOARD ─── */
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 className="page-title">{location.pathname === '/attendance-report' ? 'Attendance Report' : 'Admin Dashboard'}</h1>
+          {location.pathname !== '/attendance-report' && (
+            <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <Download size={20} /> Export Report to PDF
+            </button>
+          )}
+        </div>
 
       {location.pathname === '/attendance-report' ? (
         <div className="animate-fade-in">
@@ -675,6 +797,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
       </div>
       )}
+      </div>  {/* closes outer ternary wrapper div */}
     </div>
   );
 };
