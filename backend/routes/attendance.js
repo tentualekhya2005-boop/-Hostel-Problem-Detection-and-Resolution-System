@@ -26,23 +26,52 @@ const getDistanceInMeters = (lat1, lon1, lat2, lon2) => {
     return R * c; // in meters
 };
 
+// ─── Helper: Get Current IST Date/Time (Asia/Kolkata) ───
+const getIST = () => {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata',
+        hour: 'numeric',
+        minute: 'numeric',
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour12: false
+    });
+    
+    const parts = formatter.formatToParts(now);
+    const p = (type) => parts.find(part => part.type === type).value;
+    
+    const hour = parseInt(p('hour'));
+    const minute = parseInt(p('minute'));
+    const day = p('day').padStart(2, '0');
+    const month = p('month').padStart(2, '0');
+    const year = p('year');
+
+    return {
+        hour,
+        minute,
+        dateStr: `${year}-${month}-${day}`
+    };
+};
+
 // @route   POST /api/attendance/mark
 // @desc    Student marks daily attendance within geofence 6PM - 9:30PM
 // @access  Student
 router.post('/mark', protect, async (req, res) => {
     try {
         const { lat, lon } = req.body;
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-
+        const ist = getIST();
+        
         // 1. Time Check (6:00 PM to 9:30 PM)
-        const timeValue = currentHour * 60 + currentMinute;
+        const timeValue = ist.hour * 60 + ist.minute;
         const startWindow = 18 * 60; // 18:00 (6:00 PM)
         const endWindow = 21 * 60 + 30; // 21:30 (9:30 PM)
 
         if (timeValue < startWindow || timeValue > endWindow) {
-            return res.status(403).json({ message: 'Attendance window closed. Open between 6:00 PM and 9:30 PM only.' });
+            return res.status(403).json({ 
+                message: `Attendance window closed. It is currently ${ist.hour}:${ist.minute.toString().padStart(2, '0')} IST. Open between 6:00 PM and 9:30 PM only.` 
+            });
         }
 
         // 2. Geofence Check
@@ -61,7 +90,7 @@ router.post('/mark', protect, async (req, res) => {
         }
 
         // 3. Create Attendance Record
-        const todayDate = now.toISOString().split('T')[0];
+        const todayDate = ist.dateStr;
         const existing = await Attendance.findOne({ studentId: req.user._id, date: todayDate });
         
         if (existing) {
@@ -87,7 +116,8 @@ router.post('/mark', protect, async (req, res) => {
 // @access  Admin
 router.get('/daily-report', protect, admin, async (req, res) => {
     try {
-        const todayDate = new Date().toISOString().split('T')[0];
+        const ist = getIST();
+        const todayDate = ist.dateStr;
         const allStudents = await User.find({ role: 'student' }).select('name roomNumber year block email');
         const presentRecords = await Attendance.find({ date: todayDate }).populate('studentId', 'name roomNumber year block');
         
