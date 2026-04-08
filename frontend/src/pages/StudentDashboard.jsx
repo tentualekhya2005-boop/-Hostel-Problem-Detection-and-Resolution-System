@@ -51,22 +51,24 @@ const StudentDashboard = () => {
     } catch (e) { }
   };
 
-  const handleRate = async (meal, rating) => {
+  const handleRate = async (meal, rating, itemName) => {
     const today = new Date().toISOString().split('T')[0];
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/rate`, { date: today, meal, rating }, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/rate`, { date: today, meal, rating, itemName }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      setMyRatings(prev => ({ ...prev, [meal]: rating }));
-      toast.success(`${meal.charAt(0).toUpperCase() + meal.slice(1)} rated ${rating}★`, { position: 'bottom-right' });
+      
+      const newRatings = { ...myRatings };
+      const items = [...(newRatings.itemRatings || [])];
+      const idx = items.findIndex(i => i.itemName === itemName);
+      if (idx > -1) items[idx].rating = rating;
+      else items.push({ itemName, category: meal, rating });
+      newRatings.itemRatings = items;
+      newRatings[meal] = rating;
+
+      setMyRatings(newRatings);
+      toast.success(`${itemName} rated ${rating}★`, { position: 'bottom-right' });
     } catch (e) { toast.error("Rating failed"); }
-  };
-    try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      setStats(data);
-    } catch (error) { console.log('Failed to load stats'); }
   };
 
   const fetchAnnouncements = async () => {
@@ -269,30 +271,43 @@ const StudentDashboard = () => {
               <Calendar size={24} /> {t('todays_menu')}
             </div>
             {menu ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem', fontSize: '0.875rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', fontSize: '0.8rem' }}>
                 {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
-                  <div key={meal} style={{ position: 'relative', padding: '0.5rem', background: 'rgba(255,255,255,0.1)', borderRadius: '0.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong style={{ textTransform: 'capitalize' }}>{meal}:</strong>
-                      <Heart 
-                        size={18} 
-                        style={{ cursor: 'pointer', fill: userFavorites.includes(menu[meal]) ? 'white' : 'transparent', transition: 'all 0.2s' }}
-                        onClick={() => toggleFavorite(menu[meal])}
-                      />
-                    </div>
-                    <div style={{ marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{menu[meal]}</div>
-                    <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.2rem' }}>
-                      {[1,2,3,4,5].map(star => (
-                        <Star 
-                          key={star} 
-                          size={14} 
-                          fill={star <= (myRatings[meal] || 0) ? 'gold' : 'transparent'}
-                          stroke={star <= (myRatings[meal] || 0) ? 'gold' : 'rgba(255,255,255,0.4)'}
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => handleRate(meal, star)}
-                        />
-                      ))}
-                    </div>
+                  <div key={meal} style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', opacity: 0.9 }}>{meal}</div>
+                    
+                    {(menu[meal] || '').split(',').map((item, idx) => {
+                      const itemName = item.trim();
+                      if (!itemName) return null;
+                      
+                      const itemRatingObj = (myRatings.itemRatings || []).find(ir => ir.itemName === itemName);
+                      const currentRating = itemRatingObj ? itemRatingObj.rating : (myRatings[meal] || 0);
+
+                      return (
+                        <div key={idx} style={{ borderBottom: idx < (menu[meal].split(',').length -1) ? '1px dashed rgba(255,255,255,0.2)' : 'none', paddingBottom: '0.25rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{itemName}</span>
+                            <Heart 
+                              size={14} 
+                              style={{ cursor: 'pointer', fill: userFavorites.includes(itemName) ? 'white' : 'transparent', transition: 'all 0.2s' }}
+                              onClick={() => toggleFavorite(itemName)}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', gap: '2px' }}>
+                            {[1,2,3,4,5].map(star => (
+                              <Star 
+                                key={star} 
+                                size={12} 
+                                fill={star <= currentRating ? '#FFD700' : 'transparent'}
+                                stroke={star <= currentRating ? '#FFD700' : 'rgba(255,255,255,0.4)'}
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleRate(meal, star, itemName)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
               </div>
