@@ -13,6 +13,8 @@ import FavoritesPage from '../pages/FavoritesPage';
 import MenuFeedbackPage from '../pages/MenuFeedbackPage';
 import FoodAnalyticsPage from '../pages/FoodAnalyticsPage';
 
+import ReportsPage from '../pages/ReportsPage';
+
 const DashboardRouter = () => {
   const { user } = useContext(AuthContext);
 
@@ -38,6 +40,7 @@ const DashboardRouter = () => {
             <Route path="/" element={<AdminDashboard />} />
              <Route path="/attendance-report" element={<AdminDashboard />} />
             <Route path="/food-analytics" element={<FoodAnalyticsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/hostel-stats" element={<AdminDashboard />} />
             <Route path="/admin-complaints" element={<AdminDashboard />} />
             <Route path="/users" element={<AdminDashboard />} />

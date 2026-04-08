@@ -385,8 +385,17 @@ const AdminDashboard = () => {
 
           {/* Menu Ratings Analytics */}
           <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-              <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction Score (%)
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1.25rem' }}>
+                <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction Score (%)
+              </div>
+              <button 
+                onClick={() => window.location.href='/reports'} 
+                className="btn btn-secondary" 
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', borderRadius: '8px' }}
+              >
+                View Weekly Reports &rarr;
+              </button>
             </div>
             <div style={{ width: '100%', height: 300 }}>
               {menuRatings.length > 0 ? (

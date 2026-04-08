@@ -28,7 +28,7 @@ const Sidebar = ({ role }) => {
           { name: t('all_complaints'), path: '/admin-complaints', icon: <List size={22} /> },
           { name: t('manage_users'), path: '/users', icon: <Users size={22} /> },
           { name: t('manage_menu'), path: '/manage-menu', icon: <Utensils size={22} /> },
-          { name: 'Reports', path: '#', icon: <Music size={22} /> },
+          { name: 'Reports', path: '/reports', icon: <Activity size={22} /> },
         ];
       case 'worker':
         return [

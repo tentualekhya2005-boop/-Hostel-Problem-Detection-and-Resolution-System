@@ -49,20 +49,27 @@ const MenuFeedbackPage = () => {
         }
     };
 
-    const handleRate = async (date, meal, rating) => {
+    const handleRate = async (date, meal, rating, itemName) => {
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/rate`, { date, meal, rating }, {
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/rate`, { date, meal, rating, itemName }, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             
             // Update local state
             setWeekHistory(prev => prev.map(day => {
                 if (day.date === date) {
-                    return { ...day, ratings: { ...day.ratings, [meal]: rating } };
+                    const newRatings = { ...day.ratings };
+                    const items = [...(newRatings.itemRatings || [])];
+                    const idx = items.findIndex(i => i.itemName === itemName);
+                    if (idx > -1) items[idx].rating = rating;
+                    else items.push({ itemName, category: meal, rating });
+                    newRatings.itemRatings = items;
+                    newRatings[meal] = rating; // Legacy sync
+                    return { ...day, ratings: newRatings };
                 }
                 return day;
             }));
-            toast.success("Feedback submitted!");
+            toast.success(`${itemName} rated!`);
         } catch (e) { toast.error("Rating failed"); }
     };
 
@@ -86,24 +93,40 @@ const MenuFeedbackPage = () => {
                             <Clock size={18} color="var(--text-muted)" />
                         </div>
                         
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', padding: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', padding: '1.5rem' }}>
                             {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
-                                <div key={meal} style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                                    <div style={{ color: 'var(--primary)', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'capitalize' }}>{meal}</div>
-                                    <div style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '1rem', minHeight: '2.5rem' }}>
-                                        {day.menu[meal]}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        {[1,2,3,4,5].map(star => (
-                                            <Star 
-                                                key={star} 
-                                                size={20} 
-                                                style={{ cursor: 'pointer' }}
-                                                fill={star <= (day.ratings[meal] || 0) ? 'gold' : 'transparent'}
-                                                stroke={star <= (day.ratings[meal] || 0) ? 'gold' : '#cbd5e1'}
-                                                onClick={() => handleRate(day.date, meal, star)}
-                                            />
-                                        ))}
+                                <div key={meal} style={{ padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                    <div style={{ color: 'var(--primary)', fontWeight: 800, marginBottom: '1rem', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em' }}>{meal}</div>
+                                    
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {(day.menu[meal] || '').split(',').map((item, itemIdx) => {
+                                            const itemName = item.trim();
+                                            if (!itemName) return null;
+                                            
+                                            // Find rating for this specific item in itemRatings
+                                            const itemRatingObj = (day.ratings.itemRatings || []).find(ir => ir.itemName === itemName);
+                                            const currentRating = itemRatingObj ? itemRatingObj.rating : (day.ratings[meal] || 0);
+
+                                            return (
+                                                <div key={itemIdx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: itemIdx < (day.menu[meal].split(',').length - 1) ? '1px dashed #e2e8f0' : 'none' }}>
+                                                    <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-main)' }}>{itemName}</span>
+                                                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                                        {[1,2,3,4,5].map(star => (
+                                                            <Star 
+                                                                key={star} 
+                                                                size={18} 
+                                                                style={{ cursor: 'pointer', transition: 'transform 0.1s' }}
+                                                                fill={star <= currentRating ? '#FFD700' : 'transparent'}
+                                                                stroke={star <= currentRating ? '#FFD700' : '#cbd5e1'}
+                                                                onClick={() => handleRate(day.date, meal, star, itemName)}
+                                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}
