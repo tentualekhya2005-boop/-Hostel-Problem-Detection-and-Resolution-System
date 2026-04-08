@@ -64,8 +64,6 @@ const Sidebar = ({ role }) => {
               { name: 'Resolved Tasks', path: '/worker-tasks/resolved', icon: <CheckCircle size={18} /> },
             ]
           },
-          { name: 'Daily Menu', path: '/worker-menu', icon: <Utensils size={20} /> },
-          { name: 'Attendance Log', path: '/worker-attendance', icon: <Fingerprint size={20} /> },
         ];
       default:
         return [];

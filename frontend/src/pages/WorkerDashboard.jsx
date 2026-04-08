@@ -3,15 +3,13 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Wrench, CheckCircle, Trash2, Clock, Calendar, Fingerprint } from 'lucide-react';
+import { Wrench, CheckCircle, Trash2, Clock } from 'lucide-react';
 
 const WorkerDashboard = () => {
   const { user } = useContext(AuthContext);
   const location = useLocation();
   const [tasks, setTasks] = useState([]);
   const [resolveImages, setResolveImages] = useState({});
-  const [menu, setMenu] = useState(null);
-  const [attendanceStats, setAttendanceStats] = useState(null);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
@@ -21,23 +19,11 @@ const WorkerDashboard = () => {
     return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
   };
 
-  const [ratings, setRatings] = useState([]);
+
 
   useEffect(() => {
     fetchTasks();
-    if (location.pathname === '/worker-menu') fetchMenu();
-    if (location.pathname === '/worker-attendance') fetchAttendance();
-    if (location.pathname === '/worker-ratings') fetchRatings();
-  }, [location.pathname]);
-
-  const fetchRatings = async () => {
-    try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/ratings/today`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      setRatings(data);
-    } catch (error) { console.log('Ratings not found'); }
-  };
+  }, []);
 
   const fetchTasks = async () => {
     try {
@@ -46,25 +32,6 @@ const WorkerDashboard = () => {
       });
       setTasks(data);
     } catch (error) { toast.error('Failed to load tasks'); }
-  };
-
-  const fetchMenu = async () => {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/${today}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      setMenu(data);
-    } catch (error) { console.log('Menu not found'); }
-  };
-
-  const fetchAttendance = async () => {
-    try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/daily-report`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      setAttendanceStats(data);
-    } catch (error) { console.log('Attendance not found'); }
   };
 
   const handleImageChange = (taskId, file) => {
@@ -142,74 +109,6 @@ const WorkerDashboard = () => {
   };
 
   const renderContent = () => {
-    if (location.pathname === '/worker-menu') {
-      return (
-        <div className="card animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '1.25rem' }}>
-            <Calendar size={24} /> Today's Hostel Menu
-          </div>
-          {menu ? (
-            <div style={{ display: 'grid', gap: '1rem' }}>
-              {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
-                <div key={meal} style={{ padding: '1rem', background: '#F9F5FF', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                  <div style={{ textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.25rem' }}>{meal}</div>
-                  <div style={{ fontWeight: 600 }}>{menu[meal]}</div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted">Menu hasn't been updated for today yet.</p>
-          )}
-        </div>
-      );
-    }
-
-    if (location.pathname === '/worker-attendance') {
-      return (
-        <div className="card animate-fade-in">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '1.25rem' }}>
-            <Fingerprint size={24} /> Student Attendance Summary
-          </div>
-          {attendanceStats ? (
-            <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <div style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--primary)' }}>{attendanceStats.presentCount}</div>
-              <div style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Students Present Today</div>
-              <div style={{ marginTop: '1rem', fontSize: '0.9rem' }}>Out of total <strong>{attendanceStats.totalStudents}</strong> students</div>
-            </div>
-          ) : (
-            <p className="text-muted">Attendance data not available yet.</p>
-          )}
-        </div>
-      );
-    }
-
-    if (location.pathname === '/worker-ratings') {
-      return (
-        <div className="card animate-fade-in">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '1.25rem' }}>
-            <Wrench size={24} /> Food Item Satisfaction
-          </div>
-          {ratings.length > 0 ? (
-            <div style={{ display: 'grid', gap: '1rem' }}>
-              {ratings.map((r, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: '#F9FAFB', borderRadius: '12px' }}>
-                  <span style={{ fontWeight: 600 }}>{r.name}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '100px', height: '8px', background: '#E5E7EB', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ width: `${r.value}%`, height: '100%', background: 'var(--gradient-btn)' }} />
-                    </div>
-                    <span style={{ fontWeight: 800, color: 'var(--primary)', minWidth: '40px' }}>{r.value}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted">No food ratings recorded today.</p>
-          )}
-        </div>
-      );
-    }
-
     const currentTasks = filteredTasks();
 
     return (

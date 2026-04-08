@@ -57,9 +57,6 @@ const DashboardRouter = () => {
             <Route path="/" element={<WorkerDashboard />} />
             <Route path="/worker-tasks/pending" element={<WorkerDashboard />} />
             <Route path="/worker-tasks/resolved" element={<WorkerDashboard />} />
-            <Route path="/worker-menu" element={<WorkerDashboard />} />
-            <Route path="/worker-attendance" element={<WorkerDashboard />} />
-            <Route path="/worker-ratings" element={<WorkerDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         );
