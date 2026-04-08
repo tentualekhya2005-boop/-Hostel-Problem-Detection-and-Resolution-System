@@ -225,20 +225,206 @@ const AdminDashboard = () => {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ef4444'];
 
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">{location.pathname === '/attendance-report' ? 'Attendance Report' : 'Admin Dashboard'}</h1>
-        {location.pathname !== '/attendance-report' && (
-          <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <Download size={20} /> Export Report to PDF
-          </button>
-        )}
+  const filteredComplaints = () => {
+    switch (location.pathname) {
+      case '/admin-complaints/pending': return complaints.filter(c => c.status === 'Pending');
+      case '/admin-complaints/assigned': return complaints.filter(c => c.status === 'Assigned');
+      case '/admin-complaints/resolved': return complaints.filter(c => c.status === 'Resolved' || c.status === 'Needs Verification');
+      default: return complaints;
+    }
+  };
+
+  const renderOverview = () => (
+    <div id="report-content" className="animate-fade-in">
+      <div className="grid-stats" style={{ marginBottom: '2rem' }}>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #4F46E5', background: 'white' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Total Complaints</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#4F46E5' }}>{cardStats.total}</div>
+        </div>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F59E0B', background: 'white' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Pending Actions</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F59E0B' }}>{cardStats.pending}</div>
+        </div>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #06B6D4', background: 'white' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>In Progress</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#06B6D4' }}>{cardStats.assigned}</div>
+        </div>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F472B6', background: 'white' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Needs Verification</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F472B6' }}>{cardStats.needsVerification}</div>
+        </div>
+        <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #10B981', background: 'white' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Closed / Resolved</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10B981' }}>{cardStats.resolved}</div>
+        </div>
       </div>
 
-      {location.pathname === '/attendance-report' ? (
+      <div className="grid-responsive" style={{ marginBottom: '2rem' }}>
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+            <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
+          </div>
+          <div style={{ width: '100%', height: 300 }}>
+            {complaints.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={categoryData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-muted)' }}>No complaints recorded yet.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1.1rem' }}>
+              <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction
+            </div>
+          </div>
+          <div style={{ width: '100%', height: 300 }}>
+            {menuRatings.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={menuRatings} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} unit="%" />
+                  <RechartsTooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                  <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={25} />
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#9B5DE5" />
+                      <stop offset="100%" stopColor="#F15BB5" />
+                    </linearGradient>
+                  </defs>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-muted)' }}>
+                <p>No student ratings for today yet.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Broadcast widget only on home */}
+      <div className="card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+          <Bell size={24} color="var(--primary)" /> Send Announcement
+        </div>
+        <form onSubmit={handleSendAnnouncement}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Target Audience</label>
+              <select className="form-select" value={announcement.targetRole} onChange={(e) => setAnnouncement({...announcement, targetRole: e.target.value})} required>
+                <option value="all">Every User (All Roles)</option>
+                <option value="student">Students</option>
+                <option value="worker">Workers</option>
+                <option value="admin">Admins</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Announcement Title</label>
+              <input type="text" className="form-input" value={announcement.title} onChange={(e) => setAnnouncement({...announcement, title: e.target.value})} required placeholder="E.g., System Maintenance" />
+            </div>
+          </div>
+          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+            <label className="form-label">Message Details</label>
+            <textarea className="form-textarea" value={announcement.message} onChange={(e) => setAnnouncement({...announcement, message: e.target.value})} required rows="3" placeholder="Write your announcement message here..."></textarea>
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>Send Notification 🚀</button>
+        </form>
+      </div>
+    </div>
+  );
+
+  const renderComplaints = () => (
+    <div className="card animate-fade-in" style={{ gridColumn: '1 / -1' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+        <AlertTriangle size={24} color="var(--primary)" /> {location.pathname.split('/').pop().replace('-', ' ')}
+      </div>
+      
+      <div className="table-responsive">
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
+              <th style={{ padding: '0.75rem' }}>Title</th>
+              <th style={{ padding: '0.75rem' }}>Student</th>
+              <th style={{ padding: '0.75rem' }}>Location</th>
+              <th style={{ padding: '0.75rem' }}>Year</th>
+              <th style={{ padding: '0.75rem' }}>Category</th>
+              <th style={{ padding: '0.75rem' }}>Photos</th>
+              <th style={{ padding: '0.75rem' }}>Status</th>
+              <th style={{ padding: '0.75rem' }}>Action / Assignment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredComplaints().map(c => (
+              <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
+                <td style={{ padding: '0.75rem', fontWeight: 600, maxWidth: '130px' }}>{c.title}</td>
+                <td style={{ padding: '0.75rem' }}>
+                  <div style={{ fontWeight: 500 }}>{c.studentId?.name || 'Unknown'}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.studentId?.email || ''}</div>
+                </td>
+                <td style={{ padding: '0.75rem' }}>
+                  <div style={{fontSize: '0.85rem'}}><strong>Rm:</strong> {c.roomNumber || 'N/A'}</div>
+                  <div style={{fontSize: '0.75rem', color: 'var(--text-muted)'}}>{c.block} | Flr {c.floor}</div>
+                </td>
+                <td style={{ padding: '0.75rem' }}>
+                  <span className="badge badge-assigned" style={{fontSize: '0.7rem'}}>{c.year} Year</span>
+                </td>
+                <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
+                <td style={{ padding: '0.75rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {c.imageUrl && <a href={getFullImageUrl(c.imageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--primary)'}}>📸 Issue</a>}
+                    {c.resolvedImageUrl && <a href={getFullImageUrl(c.resolvedImageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)', fontWeight: 600}}>✅ Resolved</a>}
+                  </div>
+                </td>
+                <td style={{ padding: '0.75rem' }}>
+                  <span className={`badge badge-${c.status.toLowerCase().replace(/ /g, '-')}`}>{c.status}</span>
+                </td>
+                <td style={{ padding: '0.75rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                    {c.status === 'Pending' ? (
+                      <select className="form-select" style={{ padding: '0.25rem', fontSize: '0.8rem' }} value={c.assignedWorkerId?._id || ''} onChange={(e) => handleAssignWorker(c._id, e.target.value)}>
+                        <option value="">Select Worker...</option>
+                        {workers.map(w => (
+                          <option key={w._id} value={w._id}>{w.name} ({w.skills?.join(', ')})</option>
+                        ))}
+                      </select>
+                    ) : c.status === 'Assigned' ? (
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Assigned to {c.assignedWorkerId?.name}</span>
+                    ) : c.status === 'Resolved' ? (
+                      <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>Finalized</span>
+                    ) : (
+                      <>
+                         <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleAdminAction(c._id, 'Resolve')}>✅ Finalize</button>
+                         <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleAdminAction(c._id, 'Reassign')}>❌ Reassign</button>
+                      </>
+                    )}
+                    <button onClick={() => handleAdminDelete(c._id)} style={{ color: '#ef4444', background: 'none', border: 'none', fontSize: '0.7rem', cursor: 'pointer', textAlign: 'left', marginTop: '4px' }}>🗑️ Delete Permanently</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    if (location.pathname === '/attendance-report') {
+      return (
         <div className="animate-fade-in">
-          {/* Year-wise summary cards */}
           <div className="grid-stats" style={{ marginBottom: '2rem' }}>
             {(attendanceData.yearStats || []).map(stat => (
               <div key={stat.year} className="card" style={{ padding: '1.5rem', textAlign: 'center', borderBottom: '4px solid var(--primary)' }}>
@@ -256,24 +442,8 @@ const AdminDashboard = () => {
           <div className="card">
             <div style={{ display: 'flex', flexDirection: 'column', mdDirection: 'row', gap: '1rem', justifyContent: 'space-between', marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button 
-                    onClick={() => setAttendanceSubTab('present')}
-                    className={`btn ${attendanceSubTab === 'present' ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ borderRadius: '0.75rem', padding: '0.6rem 1.25rem' }}
-                >
-                    ✅ <span className="hide-mobile">Present Sheet</span><span className="show-mobile">Present</span>
-                </button>
-                <button 
-                    onClick={() => setAttendanceSubTab('absent')}
-                    className={`btn ${attendanceSubTab === 'absent' ? 'btn-danger' : 'btn-secondary'}`}
-                    style={{ 
-                        borderRadius: '0.75rem', padding: '0.6rem 1.25rem',
-                        background: attendanceSubTab === 'absent' ? '#ef4444' : '',
-                        color: attendanceSubTab === 'absent' ? 'white' : ''
-                    }}
-                >
-                    ❌ <span className="hide-mobile">Absent Sheet</span><span className="show-mobile">Absent</span>
-                </button>
+                <button onClick={() => setAttendanceSubTab('present')} className={`btn ${attendanceSubTab === 'present' ? 'btn-primary' : 'btn-secondary'}`}>✅ Present Sheet</button>
+                <button onClick={() => setAttendanceSubTab('absent')} className={`btn ${attendanceSubTab === 'absent' ? 'btn-danger' : 'btn-secondary'}`} style={{background: attendanceSubTab === 'absent' ? '#ef4444' : '', color: attendanceSubTab === 'absent' ? 'white' : ''}}>❌ Absent Sheet</button>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>{attendanceData.date}</div>
@@ -284,391 +454,148 @@ const AdminDashboard = () => {
             <div className="table-responsive">
               <table>
                 <thead>
-                  {attendanceSubTab === 'present' ? (
-                    <tr>
-                      <th>Student Name</th>
-                      <th>Room / Block</th>
-                      <th>Year</th>
-                      <th>Check-in Time</th>
-                    </tr>
-                  ) : (
-                    <tr>
-                      <th>Student Name</th>
-                      <th>Room / Block</th>
-                      <th>Year</th>
-                      <th>Contact Email</th>
-                    </tr>
-                  )}
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Room / Block</th>
+                    <th>Year</th>
+                    <th>{attendanceSubTab === 'present' ? 'Check-in Time' : 'Contact Email'}</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {attendanceSubTab === 'present' ? (
-                    (attendanceData.presentRecords || []).length > 0 ? (
-                      attendanceData.presentRecords.map((r) => (
-                        <tr key={r._id}>
-                          <td><div style={{ fontWeight: 700 }}>{r.studentId?.name}</div></td>
-                          <td>{r.studentId?.roomNumber} / {r.studentId?.block}</td>
-                          <td>{r.studentId?.year}</td>
-                          <td><div className="badge badge-resolved" style={{fontSize:'0.7rem'}}>{new Date(r.timestamp).toLocaleTimeString()}</div></td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: '3rem' }}>No present students recorded yet today.</td></tr>
-                    )
+                    (attendanceData.presentRecords || []).map((r) => (
+                      <tr key={r._id}>
+                        <td><div style={{ fontWeight: 700 }}>{r.studentId?.name}</div></td>
+                        <td>{r.studentId?.roomNumber} / {r.studentId?.block}</td>
+                        <td>{r.studentId?.year}</td>
+                        <td><div className="badge badge-resolved">{new Date(r.timestamp).toLocaleTimeString()}</div></td>
+                      </tr>
+                    ))
                   ) : (
-                    (attendanceData.absentees || []).length > 0 ? (
-                      attendanceData.absentees.map((s) => (
-                        <tr key={s._id}>
-                          <td><div style={{ fontWeight: 700, color: '#ef4444' }}>{s.name}</div></td>
-                          <td>{s.roomNumber} / {s.block}</td>
-                          <td>{s.year}</td>
-                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.email}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: '3rem' }}>All students have marked attendance! ✅</td></tr>
-                    )
+                    (attendanceData.absentees || []).map((s) => (
+                      <tr key={s._id}>
+                        <td><div style={{ fontWeight: 700, color: '#ef4444' }}>{s.name}</div></td>
+                        <td>{s.roomNumber} / {s.block}</td>
+                        <td>{s.year}</td>
+                        <td style={{ fontSize: '0.8rem' }}>{s.email}</td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-      ) : (
-      <div id="report-content" style={{ padding: '10px' }}>
-        <div className="grid-stats" style={{ marginBottom: '2rem' }}>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #4F46E5', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Total Complaints</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#4F46E5' }}>{cardStats.total}</div>
-          </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F59E0B', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Pending Actions</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F59E0B' }}>{cardStats.pending}</div>
-          </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #06B6D4', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>In Progress</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#06B6D4' }}>{cardStats.assigned}</div>
-          </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F472B6', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Needs Verification</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F472B6' }}>{cardStats.needsVerification}</div>
-          </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #10B981', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Closed / Resolved</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10B981' }}>{cardStats.resolved}</div>
-          </div>
-        </div>
+      );
+    }
 
-        <div className="grid-responsive" style={{ marginBottom: '2rem' }}>
-          {/* Complaint Analytics */}
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-              <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
-            </div>
-            <div style={{ width: '100%', height: 300 }}>
-              {complaints.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={categoryData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <p style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-muted)' }}>No complaints recorded yet.</p>
-              )}
-            </div>
-          </div>
+    if (location.pathname.includes('admin-complaints')) {
+      return renderComplaints();
+    }
 
-          {/* Menu Ratings Analytics */}
-          <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1.1rem' }}>
-                <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction
-              </div>
-              <button 
-                onClick={() => window.location.href='/reports'} 
-                className="btn btn-secondary" 
-                style={{ fontSize: '0.7rem', padding: '0.4rem 0.6rem', borderRadius: '8px' }}
-              >
-                Reports &rarr;
-              </button>
-            </div>
-            <div style={{ width: '100%', height: 300 }}>
-              {menuRatings.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={menuRatings} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} />
-                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} unit="%" />
-                    <RechartsTooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
-                    <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={25} />
-                    <defs>
-                      <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#9B5DE5" />
-                        <stop offset="100%" stopColor="#F15BB5" />
-                      </linearGradient>
-                    </defs>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-muted)' }}>
-                  <p>No student ratings for today yet.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Manage Complaints Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
+    if (location.pathname === '/manage-menu') {
+      return (
+        <div className="card animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <AlertTriangle size={24} color="var(--primary)" /> All Complaints
+            <Calendar size={24} color="var(--primary)" /> Update Daily Menu
           </div>
-          
-          <div className="table-responsive">
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
-                  <th style={{ padding: '0.75rem' }}>Title</th>
-                  <th style={{ padding: '0.75rem' }}>Student</th>
-                  <th style={{ padding: '0.75rem' }}>Room No.</th>
-                  <th style={{ padding: '0.75rem' }}>Block</th>
-                  <th style={{ padding: '0.75rem' }}>Floor</th>
-                  <th style={{ padding: '0.75rem' }}>Year</th>
-                  <th style={{ padding: '0.75rem' }}>Category</th>
-                  <th style={{ padding: '0.75rem' }}>Photos</th>
-                  <th style={{ padding: '0.75rem' }}>Status</th>
-                  <th style={{ padding: '0.75rem' }}>Action / Assignment</th>
-                </tr>
-              </thead>
-              <tbody>
-                {complaints.map(c => (
-                  <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: 600, maxWidth: '130px' }}>{c.title}</td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <div style={{ fontWeight: 500 }}>{c.studentId?.name || 'Unknown'}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.studentId?.email || ''}</div>
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <span style={{ background: 'var(--primary-light)', color: 'var(--primary-dark)', padding: '0.2rem 0.65rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}>
-                        {c.roomNumber || 'N/A'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      {c.block
-                        ? <span style={{ fontWeight: 600, color: 'var(--plum)', fontSize: '0.85rem' }}>{c.block}</span>
-                        : <span style={{ fontSize: '0.75rem', color: '#B0A0B5', fontStyle: 'italic' }}>Not provided</span>
-                      }
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      {c.floor
-                        ? <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{c.floor}</span>
-                        : <span style={{ fontSize: '0.75rem', color: '#B0A0B5', fontStyle: 'italic' }}>Not provided</span>
-                      }
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      {c.year
-                        ? <span style={{ fontSize: '0.8rem', background: 'var(--secondary-light)', color: 'var(--secondary-dark)', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontWeight: 600 }}>{c.year}</span>
-                        : <span style={{ fontSize: '0.75rem', color: '#B0A0B5', fontStyle: 'italic' }}>Not provided</span>
-                      }
-                    </td>
-                    <td style={{ padding: '0.75rem', textTransform: 'capitalize' }}>{c.category}</td>
-                    <td style={{ padding: '0.75rem' }}>
-                      {c.imageUrl && (
-                        <div style={{ marginBottom: '0.25rem' }}>
-                          <a href={getFullImageUrl(c.imageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--primary)'}}>📸 Issue Photo</a>
-                        </div>
-                      )}
-                      {c.resolvedImageUrl && (
-                        <div style={{ position: 'relative' }}>
-                          <a href={getFullImageUrl(c.resolvedImageUrl)} target="_blank" rel="noopener noreferrer" style={{fontSize:'0.75rem', color:'var(--success)', fontWeight: 600}}>✅ Resolved Photo</a>
-                          {c.isSuspicious && (
-                            <div title={c.suspicionReason} style={{ 
-                              display: 'inline-flex', alignItems: 'center', gap: '4px',
-                              marginLeft: '8px', padding: '2px 8px', borderRadius: '4px',
-                              backgroundColor: '#fee2e2', color: '#ef4444', fontSize: '0.65rem',
-                              fontWeight: 800, border: '1px solid #fecaca', cursor: 'help'
-                            }}>
-                              ⚠️ SUSPICIOUS
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <span className={`badge badge-${c.status.toLowerCase().replace(/ /g, '-')}`} style={{ textAlign: 'center' }}>{c.status}</span>
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
-                        {c.status === 'Pending' ? (
-                          <select className="form-select" style={{ padding: '0.25rem' }} value={c.assignedWorkerId?._id || ''} onChange={(e) => handleAssignWorker(c._id, e.target.value)}>
-                            <option value="">Select Worker...</option>
-                            {workers.map(w => (
-                              <option key={w._id} value={w._id}>{w.name} ({w.skills?.join(', ')})</option>
-                            ))}
-                          </select>
-                        ) : c.status === 'Assigned' ? (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Assigned to {c.assignedWorkerId?.name}</span>
-                        ) : c.status === 'Resolved' ? (
-                          <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>Finalized</span>
-                        ) : (
-                          <>
-                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Assigned to {c.assignedWorkerId?.name}</span>
-                             <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleAdminAction(c._id, 'Resolve')}>✅ Finalize Resolution</button>
-                             <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fecaca', color: '#991b1b', border: 'none' }} onClick={() => handleAdminAction(c._id, 'Reassign')}>❌ Reassign to Worker</button>
-                          </>
-                        )}
-                        <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171', marginTop: 'auto' }} onClick={() => handleAdminDelete(c._id)}>🗑️ Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="grid-responsive">
-          {/* Update Menu Widget */}
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-              <Calendar size={24} color="var(--primary)" /> Update Daily Menu
+          <form onSubmit={handleMenuSubmit}>
+            <div className="form-group">
+              <label className="form-label">Date</label>
+              <input type="date" className="form-input" value={menuDate} onChange={(e) => setMenuDate(e.target.value)} required />
             </div>
-            <form onSubmit={handleMenuSubmit}>
-              <div className="form-group">
-                <label className="form-label">Date</label>
-                <input type="date" className="form-input" value={menuDate} onChange={(e) => setMenuDate(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Breakfast</label>
-                <input type="text" className="form-input" value={menu.breakfast} onChange={(e) => setMenu({...menu, breakfast: e.target.value})} required />
-              </div>
-              <div className="grid-responsive" style={{ gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Lunch</label>
-                  <input type="text" className="form-input" value={menu.lunch} onChange={(e) => setMenu({...menu, lunch: e.target.value})} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Snacks</label>
-                  <input type="text" className="form-input" value={menu.snacks} onChange={(e) => setMenu({...menu, snacks: e.target.value})} required />
-                </div>
-              </div>
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label className="form-label">Dinner</label>
-                <input type="text" className="form-input" value={menu.dinner} onChange={(e) => setMenu({...menu, dinner: e.target.value})} required />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Menu</button>
-            </form>
-          </div>
-
-          {/* Register Worker Widget */}
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-              <UserPlus size={24} color="var(--primary)" /> Register New Worker
+            <div className="form-group">
+              <label className="form-label">Breakfast</label>
+              <input type="text" className="form-input" value={menu.breakfast} onChange={(e) => setMenu({...menu, breakfast: e.target.value})} required />
             </div>
-            <form onSubmit={handleAddWorker} autoComplete="off">
-              <div className="form-group">
-                <label className="form-label">Name</label>
-                <input type="text" className="form-input" value={newWorker.name} onChange={e=>setNewWorker({...newWorker, name: e.target.value})} required autoComplete="new-password" />
-              </div>
-              <div className="grid-responsive" style={{ gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <input type="email" className="form-input" value={newWorker.email} onChange={e=>setNewWorker({...newWorker, email: e.target.value})} required autoComplete="new-password" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <input type="password" className="form-input" value={newWorker.password} onChange={e=>setNewWorker({...newWorker, password: e.target.value})} required minLength={6} autoComplete="new-password" />
-                </div>
-              </div>
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label className="form-label">Skills (comma separated)</label>
-                <input type="text" className="form-input" value={newWorker.skills} onChange={e=>setNewWorker({...newWorker, skills: e.target.value})} required autoComplete="new-password" />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register Worker</button>
-            </form>
-          </div>
-
-          {/* Update Hostel Occupancy Stats Widget */}
-          <div className="card" style={{ gridColumn: '1 / -1' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-              <BarChart3 size={24} color="var(--primary)" /> Update Hostel Occupancy
+            <div className="form-group">
+              <label className="form-label">Lunch</label>
+              <input type="text" className="form-input" value={menu.lunch} onChange={(e) => setMenu({...menu, lunch: e.target.value})} required />
             </div>
-            <form onSubmit={handleStatsSubmit}>
-              <div className="grid-responsive" style={{ gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">1st Year Students (Occupied / Capacity)</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year1} onChange={(e) => setStats({...stats, year1: Number(e.target.value)})} required />
-                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year1Total} onChange={(e) => setStats({...stats, year1Total: Number(e.target.value)})} required />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">2nd Year Students (Occupied / Capacity)</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year2} onChange={(e) => setStats({...stats, year2: Number(e.target.value)})} required />
-                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year2Total} onChange={(e) => setStats({...stats, year2Total: Number(e.target.value)})} required />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">3rd Year Students (Occupied / Capacity)</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year3} onChange={(e) => setStats({...stats, year3: Number(e.target.value)})} required />
-                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year3Total} onChange={(e) => setStats({...stats, year3Total: Number(e.target.value)})} required />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">4th Year Students (Occupied / Capacity)</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year4} onChange={(e) => setStats({...stats, year4: Number(e.target.value)})} required />
-                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year4Total} onChange={(e) => setStats({...stats, year4Total: Number(e.target.value)})} required />
-                  </div>
-                </div>
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem' }}>Save Stats</button>
-            </form>
-          </div>
-        </div>
-
-        {/* Send Announcement Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <Bell size={24} color="var(--primary)" /> Send Announcement
-          </div>
-          <form onSubmit={handleSendAnnouncement}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Target Audience</label>
-                <select className="form-select" value={announcement.targetRole} onChange={(e) => setAnnouncement({...announcement, targetRole: e.target.value})} required>
-                  <option value="all">Every User (All Roles)</option>
-                  <option value="student">Students</option>
-                  <option value="worker">Workers</option>
-                  <option value="admin">Admins</option>
-                </select>
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Announcement Title</label>
-                <input type="text" className="form-input" value={announcement.title} onChange={(e) => setAnnouncement({...announcement, title: e.target.value})} required placeholder="E.g., System Maintenance" />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Snacks</label>
+              <input type="text" className="form-input" value={menu.snacks} onChange={(e) => setMenu({...menu, snacks: e.target.value})} required />
             </div>
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">Message Details</label>
-              <textarea className="form-textarea" value={announcement.message} onChange={(e) => setAnnouncement({...announcement, message: e.target.value})} required rows="3" placeholder="Write your announcement message here..."></textarea>
+              <label className="form-label">Dinner</label>
+              <input type="text" className="form-input" value={menu.dinner} onChange={(e) => setMenu({...menu, dinner: e.target.value})} required />
             </div>
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>Send Notification 🚀</button>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Menu</button>
           </form>
         </div>
+      );
+    }
 
+    if (location.pathname === '/users') {
+      return (
+        <div className="card animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+            <UserPlus size={24} color="var(--primary)" /> Register New Worker
+          </div>
+          <form onSubmit={handleAddWorker} autoComplete="off">
+            <div className="form-group">
+              <label className="form-label">Name</label>
+              <input type="text" className="form-input" value={newWorker.name} onChange={e=>setNewWorker({...newWorker, name: e.target.value})} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input type="email" className="form-input" value={newWorker.email} onChange={e=>setNewWorker({...newWorker, email: e.target.value})} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input type="password" className="form-input" value={newWorker.password} onChange={e=>setNewWorker({...newWorker, password: e.target.value})} required minLength={6} />
+            </div>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">Skills (comma separated)</label>
+              <input type="text" className="form-input" value={newWorker.skills} onChange={e=>setNewWorker({...newWorker, skills: e.target.value})} required />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register Worker</button>
+          </form>
+        </div>
+      );
+    }
+
+    if (location.pathname === '/hostel-stats') {
+       return (
+        <div className="card animate-fade-in">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+            <BarChart3 size={24} color="var(--primary)" /> Update Hostel Occupancy
+          </div>
+          <form onSubmit={handleStatsSubmit}>
+            <div className="grid-responsive" style={{ gap: '1rem' }}>
+              {[1, 2, 3, 4].map(yr => (
+                <div key={yr} className="form-group">
+                  <label className="form-label">{yr}st Year Students (Occupied / Capacity)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="number" className="form-input" placeholder="Occ" value={stats[`year${yr}`]} onChange={(e) => setStats({...stats, [`year${yr}`]: Number(e.target.value)})} required />
+                    <input type="number" className="form-input" placeholder="Cap" value={stats[`year${yr}Total`]} onChange={(e) => setStats({...stats, [`year${yr}Total`]: Number(e.target.value)})} required />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem' }}>Save Stats</button>
+          </form>
+        </div>
+       );
+    }
+
+    return renderOverview();
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 className="page-title" style={{textTransform: 'capitalize'}}>
+          {location.pathname === '/' ? 'Admin Dashboard' : location.pathname.split('/').pop().replace(/-/g, ' ')}
+        </h1>
+        {location.pathname === '/' && (
+          <button onClick={generatePDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <Download size={20} /> Export Report
+          </button>
+        )}
       </div>
-      )}
+
+      {renderContent()}
     </div>
   );
 };

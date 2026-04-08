@@ -322,8 +322,38 @@ a:hover { color: var(--primary-dark); }
   background: var(--gradient-btn);
   color: #FFFFFF;
   border-color: transparent;
-  box-shadow: 0 4px 16px rgba(155,93,229,0.45);
+  box-shadow: 0 4px 16px rgba(155, 93, 229, 0.45);
   font-weight: 700;
+}
+
+/* ═══ SUB-NAV STYLING ═══ */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.sub-nav {
+  margin-left: 0.5rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.05);
+  padding-left: 0.5rem;
+}
+
+.sub-link {
+  min-height: 40px;
+  padding: 0.5rem 1rem !important;
+  opacity: 0.8;
+}
+
+.sub-link:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.sub-link.active {
+  background: rgba(155, 93, 229, 0.15) !important;
+  color: var(--accent) !important;
+  box-shadow: none !important;
+  opacity: 1;
 }
 
 /* ═══ MAIN CONTENT ═══ */

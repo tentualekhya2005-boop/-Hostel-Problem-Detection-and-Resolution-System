@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Attendance = require('../models/Attendance');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, admin, staff } = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
 // ─── CONFIGURATION ───
@@ -84,8 +84,8 @@ router.post('/mark', protect, async (req, res) => {
 
 // @route   GET /api/attendance/daily-report
 // @desc    Admin gets attendance report for today with absentees
-// @access  Admin
-router.get('/daily-report', protect, admin, async (req, res) => {
+// @access  Staff
+router.get('/daily-report', protect, staff, async (req, res) => {
     try {
         const todayDate = new Date().toISOString().split('T')[0];
         const allStudents = await User.find({ role: 'student' }).select('name roomNumber year block email');
