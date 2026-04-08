@@ -209,16 +209,32 @@ const StudentDashboard = ({ filterStatus }) => {
   return (
     <div className="animate-fade-in">
       <header style={{ marginBottom: '2.5rem' }}>
-        <h1 className="page-title">{filterStatus ? `${filterStatus} Complaints` : 'Student Dashboard'}</h1>
-        <p className="text-muted">{filterStatus ? `View all your ${filterStatus.toLowerCase()} issues.` : 'Welcome back to your hostel portal.'}</p>
+        <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {filterStatus ? (
+            <>
+              <AlertCircle size={28} color="var(--primary)" />
+              {filterStatus} Complaints
+            </>
+          ) : (
+            <>
+              <PlusCircle size={32} color="var(--primary)" />
+              Raise a New Complaint
+            </>
+          )}
+        </h1>
+        <p className="text-muted">
+          {filterStatus 
+            ? `Viewing your ${filterStatus.toLowerCase()} issues and their progress.` 
+            : 'Fill out the form below to report a problem in your hostel room or floor.'}
+        </p>
       </header>
 
-      {!filterStatus && (
-        <div className="grid-responsive" style={{ marginBottom: '2rem' }}>
-          {/* Submit Complaint Box */}
+      {!filterStatus ? (
+        /* ─── RAISE COMPLAINT FORM (PRIMARY VIEW) ─── */
+        <div style={{ maxWidth: '850px', margin: '0 auto' }}>
           <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1.25rem' }}>
-              <PlusCircle size={24} /> {t('submit_complaint')}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 700, fontSize: '1.2rem' }}>
+              <PlusCircle size={22} /> Tell us what's wrong
             </div>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
@@ -271,123 +287,93 @@ const StudentDashboard = ({ filterStatus }) => {
 
               <div className="form-group">
                 <label className="form-label">{t('description')}</label>
-                <textarea className="form-textarea" rows="3" placeholder="Describe the issue in detail..." value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
+                <textarea className="form-textarea" rows="4" placeholder="Describe the issue in detail..." value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
               </div>
-              <div className="form-group">
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                 <label className="form-label">Attached Image (Optional)</label>
-                <input type="file" className="form-input" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
+                <div style={{ 
+                  border: '2px dashed var(--border)', 
+                  borderRadius: '12px', 
+                  padding: '1rem', 
+                  textAlign: 'center',
+                  background: 'var(--bg-main)'
+                }}>
+                  <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} style={{ width: '100%', fontSize: '0.85rem' }} />
+                  {image && <p style={{ marginTop: '0.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '0.8rem' }}>✓ File selected: {image.name}</p>}
+                </div>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={submitting}>
-                {submitting ? 'Submitting...' : t('submit')}
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem' }} disabled={submitting}>
+                {submitting ? 'Submitting...' : '🚀 ' + t('submit')}
               </button>
             </form>
           </div>
-
-          {/* Right side widgets */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {/* Menu Widget */}
-            <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', color: 'white' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem' }}>
-                <Calendar size={24} /> {t('todays_menu')}
-              </div>
-              {menu ? (
-                <div className="grid-responsive" style={{ gap: '1rem', fontSize: '0.8rem' }}>
-                  {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
-                    <div key={meal} style={{ padding: '0.85rem', background: 'rgba(255,255,255,0.15)', borderRadius: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <div style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', opacity: 0.9, letterSpacing: '0.05em' }}>{meal}</div>
-                      {(menu[meal] || '').split(',').map((item, idx, arr) => {
-                        const itemName = item.trim();
-                        if (!itemName) return null;
-                        const itemRatingObj = (myRatings?.itemRatings || []).find(ir => ir.itemName === itemName);
-                        const currentRating = itemRatingObj ? itemRatingObj.rating : (myRatings?.[meal] || 0);
-                        return (
-                          <div key={idx} style={{ borderBottom: idx < arr.length - 1 ? '1px dashed rgba(255,255,255,0.2)' : 'none', paddingBottom: '0.25rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{itemName}</span>
-                              <Grid size={14} style={{ cursor: 'pointer', color: userFavorites.includes(itemName) ? 'white' : 'rgba(255,255,255,0.4)', transition: 'all 0.2s' }} onClick={() => toggleFavorite(itemName)} />
-                            </div>
-                            <div style={{ display: 'flex', gap: '2px' }}>
-                              {[1,2,3,4,5].map(star => (
-                                <Star key={star} size={12} fill={star <= currentRating ? '#FFD700' : 'transparent'} stroke={star <= currentRating ? '#FFD700' : 'rgba(255,255,255,0.4)'} style={{ cursor: 'pointer' }} onClick={() => handleRate(meal, star, itemName)} />
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              ) : <p>Menu has not been updated.</p>}
-            </div>
-
-            {/* Announcements Widget */}
-            <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))', color: 'white' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', fontWeight: 600, fontSize: '1.25rem' }}>
-                <Megaphone size={24} /> {t('announcements')}
-              </div>
-              {announcements.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {announcements.map((ann, idx) => (
-                    <div key={idx} style={{ padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.2)', borderRadius: '0.5rem' }}>
-                      <div style={{ fontWeight: 600 }}>{ann.title}</div>
-                      <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{ann.message}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : <p>No announcements.</p>}
-            </div>
+        </div>
+      ) : (
+        /* ─── COMPLAINTS LIST (FILTERED VIEW) ─── */
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem' }}>
+            <AlertCircle size={22} color="var(--primary)" /> {filterStatus} History
           </div>
-        </div>
-      )}
-
-      {/* Complaints List */}
-      <div className="card" style={{ marginTop: filterStatus ? '0' : '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontWeight: 600, fontSize: '1.25rem' }}>
-          <AlertCircle size={24} /> {filterStatus ? `${filterStatus} Complaints` : 'Recent Complaints'}
-        </div>
-        <div className="grid-responsive">
-          {complaints.filter(c => {
-            if (!filterStatus) return true;
-            if (filterStatus === 'Pending') return c.status === 'Pending';
-            if (filterStatus === 'Assigned') return c.status === 'Assigned';
-            if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification', 'Student Rejected'].includes(c.status);
-            return c.status === filterStatus;
-          }).length === 0 ? (
-            <p className="text-muted">No {filterStatus?.toLowerCase() || ''} complaints found.</p>
-          ) : (
-            complaints.filter(c => {
-              if (!filterStatus) return true;
+          <div className="grid-responsive">
+            {complaints.filter(c => {
               if (filterStatus === 'Pending') return c.status === 'Pending';
               if (filterStatus === 'Assigned') return c.status === 'Assigned';
               if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification', 'Student Rejected'].includes(c.status);
               return c.status === filterStatus;
-            }).slice(0, filterStatus ? 100 : 6).map((comp) => (
-              <div key={comp._id} className="complaint-card" style={{ padding: '1.25rem', border: '1px solid var(--border)', borderRadius: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <strong style={{ color: 'var(--text-main)' }}>{comp.title}</strong>
-                  <span className={`badge badge-${comp.status.toLowerCase().replace(/ /g, '-')}`}>{comp.status}</span>
-                </div>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{comp.description}</p>
-                {comp.imageUrl && <div style={{ marginTop: '0.75rem' }}><img src={getFullImageUrl(comp.imageUrl)} alt="Issue" style={{ width: '100%', maxWidth: '200px', borderRadius: '0.5rem' }} /></div>}
-                
-                {comp.status === 'Needs Verification' && (
-                  <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'var(--primary-light)', borderRadius: '0.5rem' }}>
-                    <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Has this problem been fixed?</p>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', flex: 1 }} onClick={() => handleVerify(comp._id, true)}>Yes</button>
-                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', flex: 1 }} onClick={() => handleVerify(comp._id, false)}>No</button>
-                    </div>
-                  </div>
-                )}
-                <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(comp.createdAt).toLocaleDateString()}</span>
-                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: '#ef4444' }} onClick={() => handleDelete(comp._id)}>Delete</button>
-                </div>
+            }).length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem', gridColumn: '1 / -1' }}>
+                <p className="text-muted">No {filterStatus?.toLowerCase()} complaints found.</p>
               </div>
-            ))
-          )}
+            ) : (
+              complaints.filter(c => {
+                if (filterStatus === 'Pending') return c.status === 'Pending';
+                if (filterStatus === 'Assigned') return c.status === 'Assigned';
+                if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification', 'Student Rejected'].includes(c.status);
+                return c.status === filterStatus;
+              }).map((comp) => (
+                <div key={comp._id} className="complaint-card" style={{ padding: '1.5rem', border: '1px solid var(--border)', borderRadius: '1rem', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <strong style={{ color: 'var(--text-main)', fontSize: '1.1rem' }}>{comp.title}</strong>
+                    <span className={`badge badge-${comp.status.toLowerCase().replace(/ /g, '-')}`}>{comp.status}</span>
+                  </div>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{comp.description}</p>
+                  
+                  {comp.imageUrl && (
+                    <div style={{ marginBottom: '1rem' }}>
+                      <a href={getFullImageUrl(comp.imageUrl)} target="_blank" rel="noopener noreferrer">
+                        <img src={getFullImageUrl(comp.imageUrl)} alt="Issue" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '0.75rem', border: '2px solid var(--border)' }} />
+                      </a>
+                    </div>
+                  )}
+                  
+                  {comp.status === 'Needs Verification' && (
+                    <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'var(--primary-light)', borderRadius: '0.75rem', border: '1px solid var(--primary-light)' }}>
+                      <p style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--primary-dark)' }}>Maintenance worker marked this as fixed. Is it resolved?</p>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-primary" style={{ padding: '0.4rem 0.75rem', flex: 1, fontSize: '0.85rem' }} onClick={() => handleVerify(comp._id, true)}>✅ Yes</button>
+                        <button className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', flex: 1, fontSize: '0.85rem' }} onClick={() => handleVerify(comp._id, false)}>❌ No</button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                       <Calendar size={14} /> {new Date(comp.createdAt).toLocaleDateString()}
+                    </div>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', color: '#ef4444', borderColor: '#fee2e2' }} 
+                      onClick={() => handleDelete(comp._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

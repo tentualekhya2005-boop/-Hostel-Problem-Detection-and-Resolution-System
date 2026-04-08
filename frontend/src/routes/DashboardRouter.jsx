@@ -16,6 +16,7 @@ import ReportsPage from '../pages/ReportsPage';
 import WorkerRegistrationPage from '../pages/WorkerRegistrationPage';
 import AnnouncementPage from '../pages/AnnouncementPage';
 import UpdatePage from '../pages/UpdatePage';
+import StudentAnnouncementsPage from '../pages/StudentAnnouncementsPage';
 
 const DashboardRouter = () => {
   const { user } = useContext(AuthContext);
@@ -34,6 +35,7 @@ const DashboardRouter = () => {
             <Route path="/complaints/pending" element={<StudentDashboard filterStatus="Pending" />} />
             <Route path="/complaints/assigned" element={<StudentDashboard filterStatus="Assigned" />} />
             <Route path="/complaints/resolved" element={<StudentDashboard filterStatus="Resolved" />} />
+            <Route path="/announcements" element={<StudentAnnouncementsPage />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         );

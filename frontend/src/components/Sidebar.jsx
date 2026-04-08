@@ -27,6 +27,7 @@ const Sidebar = ({ role }) => {
           { name: 'Assigned Complaints', path: '/complaints/assigned', icon: <ClipboardList size={22} /> },
           { name: 'Resolved Complaints', path: '/complaints/resolved', icon: <CheckCircle size={22} /> },
           { name: 'Daily Attendance', path: '/attendance', icon: <Fingerprint size={22} /> },
+          { name: 'Announcements', path: '/announcements', icon: <Radio size={22} /> },
           { name: "Today's Menu", path: '/menu-feedback', icon: <Utensils size={22} /> },
           { name: 'My Favourites', path: '/favorites', icon: <Grid size={22} /> },
         ];
