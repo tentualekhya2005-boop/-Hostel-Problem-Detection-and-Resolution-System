@@ -118,6 +118,17 @@ const StudentDashboard = () => {
     } catch (e) { toast.error("Action failed"); }
   };
 
+  const fetchUserFavorites = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/me`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setUserFavorites(data.favorites || []);
+    } catch (e) {
+      console.log("Failed to load favorites");
+    }
+  };
+
   const fetchStats = async () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
