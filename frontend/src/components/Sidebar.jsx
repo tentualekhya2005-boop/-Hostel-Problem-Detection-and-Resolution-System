@@ -1,13 +1,22 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, List, Utensils, Users, User, LogOut, Radio, Fingerprint, Grid, CheckCircle, Clock, ClipboardList, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 const Sidebar = ({ role }) => {
   const location = useLocation();
   const { t } = useTranslation();
   const { user, logout } = useContext(AuthContext);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      logout();
+      setIsLoggingOut(false);
+    }, 800); // Small delay for visual feedback
+  };
 
   const getLinks = () => {
     switch (role) {
@@ -89,18 +98,19 @@ const Sidebar = ({ role }) => {
       {/* Logout */}
       <div className="logout-section" style={{ padding: '1.5rem', marginTop: 'auto' }}>
         <button
-          onClick={logout}
+          onClick={handleLogout}
+          disabled={isLoggingOut}
           style={{
             background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)',
             display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem 1.2rem',
-            cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, width: '100%',
+            cursor: isLoggingOut ? 'not-allowed' : 'pointer', fontSize: '0.9rem', fontWeight: 600, width: '100%',
             borderRadius: '0.875rem'
           }}
-          onMouseOver={(e) => e.currentTarget.style.color = 'white'}
-          onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+          onMouseOver={(e) => !isLoggingOut && (e.currentTarget.style.color = 'white')}
+          onMouseOut={(e) => !isLoggingOut && (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
         >
-          <LogOut size={20} />
-          {t('logout')}
+          <LogOut size={20} className={isLoggingOut ? 'animate-spin' : ''} />
+          {isLoggingOut ? 'Logging out...' : t('logout')}
         </button>
       </div>
     </div>

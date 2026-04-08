@@ -23,6 +23,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const [block, setBlock] = useState('Nagavalli');
   const [floor, setFloor] = useState('');
   const [image, setImage] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
@@ -174,6 +175,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
@@ -199,6 +201,8 @@ const StudentDashboard = ({ filterStatus }) => {
       fetchMyComplaints();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Submission failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -273,7 +277,9 @@ const StudentDashboard = ({ filterStatus }) => {
                 <label className="form-label">Attached Image (Optional)</label>
                 <input type="file" className="form-input" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>{t('submit')}</button>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={submitting}>
+                {submitting ? 'Submitting...' : t('submit')}
+              </button>
             </form>
           </div>
 

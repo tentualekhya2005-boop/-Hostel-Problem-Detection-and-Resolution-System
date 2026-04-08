@@ -14,6 +14,7 @@ const Register = () => {
   
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,6 +22,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const payload = { ...formData, role: 'student' }; // Implicitly register as student
     const res = await register(payload);
     
@@ -29,6 +31,7 @@ const Register = () => {
       navigate('/');
     } else {
       toast.error(res.message);
+      setLoading(false);
     }
   };
 
@@ -61,8 +64,8 @@ const Register = () => {
             <input type="password" name="password" className="form-input" value={formData.password} onChange={handleChange} required minLength={6} autoComplete="new-password" />
           </div>
           
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Sign Up
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'Registering...' : 'Sign Up'}
           </button>
         </form>
         

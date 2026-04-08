@@ -9,15 +9,18 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const res = await login(email, password);
     if (res.success) {
       toast.success('Logged in successfully');
       navigate('/');
     } else {
       toast.error(res.message);
+      setLoading(false);
     }
   };
 
@@ -60,8 +63,8 @@ const Login = () => {
               required 
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Sign In
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
         
