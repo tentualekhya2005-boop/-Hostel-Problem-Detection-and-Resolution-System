@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { Wrench, CheckCircle, Trash2 } from 'lucide-react';
 
-const WorkerDashboard = () => {
+const WorkerDashboard = ({ filterStatus }) => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [resolveImages, setResolveImages] = useState({});
@@ -69,18 +69,33 @@ const WorkerDashboard = () => {
 
   return (
     <div>
-      <h1 className="page-title">Worker Dashboard</h1>
+      <header style={{ marginBottom: '2.5rem' }}>
+        <h1 className="page-title">{filterStatus ? `${filterStatus} Tasks` : 'Worker Dashboard'}</h1>
+        <p className="text-muted">{filterStatus ? `Showing all ${filterStatus.toLowerCase()} tasks.` : 'Manage your assigned maintenance tasks.'}</p>
+      </header>
       
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1.25rem' }}>
-          <Wrench size={24} /> My Assigned Tasks
+          <Wrench size={24} /> {filterStatus ? `${filterStatus} Tasks` : 'My Assigned Tasks'}
         </div>
 
-        {tasks.length === 0 ? (
-          <p className="text-muted">You have no assigned tasks right now.</p>
+        {tasks.filter(t => {
+            if (!filterStatus) return true;
+            if (filterStatus === 'Pending') return t.status === 'Assigned';
+            if (filterStatus === 'Assigned') return t.status === 'Assigned';
+            if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification'].includes(t.status);
+            return t.status === filterStatus;
+        }).length === 0 ? (
+          <p className="text-muted">No {filterStatus?.toLowerCase() || ''} tasks found.</p>
         ) : (
           <div className="grid-responsive">
-            {tasks.map(task => (
+            {tasks.filter(t => {
+                if (!filterStatus) return true;
+                if (filterStatus === 'Pending') return t.status === 'Assigned';
+                if (filterStatus === 'Assigned') return t.status === 'Assigned';
+                if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification'].includes(t.status);
+                return t.status === filterStatus;
+            }).map(task => (
               <div key={task._id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span className={`badge badge-${task.status.toLowerCase()}`}>{task.status}</span>

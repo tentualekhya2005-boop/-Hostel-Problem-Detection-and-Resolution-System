@@ -29,6 +29,9 @@ const DashboardRouter = () => {
             <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/menu-feedback" element={<MenuFeedbackPage />} />
+            <Route path="/complaints/pending" element={<StudentDashboard filterStatus="Pending" />} />
+            <Route path="/complaints/assigned" element={<StudentDashboard filterStatus="Assigned" />} />
+            <Route path="/complaints/resolved" element={<StudentDashboard filterStatus="Resolved" />} />
             <Route path="/complaints" element={<StudentDashboard />} />
             <Route path="/menu" element={<StudentDashboard />} />
             <Route path="*" element={<Navigate to="/" />} />
@@ -38,7 +41,10 @@ const DashboardRouter = () => {
         return (
           <>
             <Route path="/" element={<AdminDashboard />} />
-             <Route path="/attendance-report" element={<AdminDashboard />} />
+            <Route path="/attendance-report" element={<AdminDashboard />} />
+            <Route path="/admin/complaints/pending" element={<AdminDashboard filterStatus="Pending" />} />
+            <Route path="/admin/complaints/assigned" element={<AdminDashboard filterStatus="Assigned" />} />
+            <Route path="/admin/complaints/resolved" element={<AdminDashboard filterStatus="Resolved" />} />
             <Route path="/food-analytics" element={<FoodAnalyticsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/hostel-stats" element={<AdminDashboard />} />
@@ -52,6 +58,9 @@ const DashboardRouter = () => {
         return (
           <>
             <Route path="/" element={<WorkerDashboard />} />
+            <Route path="/worker/tasks/pending" element={<WorkerDashboard filterStatus="Pending" />} />
+            <Route path="/worker/tasks/assigned" element={<WorkerDashboard filterStatus="Assigned" />} />
+            <Route path="/worker/tasks/resolved" element={<WorkerDashboard filterStatus="Resolved" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         );

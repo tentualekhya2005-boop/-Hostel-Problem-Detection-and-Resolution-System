@@ -8,7 +8,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, L
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ filterStatus }) => {
   const { user } = useContext(AuthContext);
   const location = useLocation();
   const [complaints, setComplaints] = useState([]);
@@ -426,7 +426,7 @@ const AdminDashboard = () => {
         {/* Manage Complaints Widget */}
         <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <AlertTriangle size={24} color="var(--primary)" /> All Complaints
+            <AlertTriangle size={24} color="var(--primary)" /> {filterStatus ? `${filterStatus} Complaints` : 'All Complaints'}
           </div>
           
           <div className="table-responsive">
@@ -446,7 +446,13 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {complaints.map(c => (
+                {complaints.filter(c => {
+                    if (!filterStatus) return true;
+                    if (filterStatus === 'Pending') return c.status === 'Pending';
+                    if (filterStatus === 'Assigned') return c.status === 'Assigned';
+                    if (filterStatus === 'Resolved') return ['Resolved', 'Student Verified', 'Needs Verification', 'Student Rejected'].includes(c.status);
+                    return c.status === filterStatus;
+                }).map(c => (
                   <tr key={c._id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '0.75rem', fontWeight: 600, maxWidth: '130px' }}>{c.title}</td>
                     <td style={{ padding: '0.75rem' }}>

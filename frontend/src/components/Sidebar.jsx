@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, List, Utensils, Users, Wrench, User, LogOut, Radio, Menu, Fingerprint, Grid, Activity } from 'lucide-react';
+import { Home, List, Utensils, Users, Wrench, User, LogOut, Radio, Menu, Fingerprint, Grid, Activity, CheckCircle, Clock, ClipboardList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
@@ -14,26 +14,32 @@ const Sidebar = ({ role }) => {
       case 'student':
         return [
           { name: t('dashboard'), path: '/', icon: <Home size={22} /> },
+          { name: 'Submitted Complaints', path: '/complaints/pending', icon: <Clock size={22} /> },
+          { name: 'Assigned Complaints', path: '/complaints/assigned', icon: <ClipboardList size={22} /> },
+          { name: 'Resolved Complaints', path: '/complaints/resolved', icon: <CheckCircle size={22} /> },
           { name: 'Daily Attendance', path: '/attendance', icon: <Fingerprint size={22} /> },
-          { name: t('my_complaints'), path: '/complaints', icon: <Radio size={22} /> },
           { name: t('todays_menu'), path: '/menu-feedback', icon: <Utensils size={22} /> },
           { name: 'My Favourites', path: '/favorites', icon: <Grid size={22} /> },
         ];
       case 'admin':
         return [
-          { name: 'Full Dashboard', path: '/', icon: <Grid size={22} /> },
+          { name: 'Admin Dashboard', path: '/', icon: <Grid size={22} /> },
+          { name: 'Pending Complaints', path: '/admin/complaints/pending', icon: <Clock size={22} /> },
+          { name: 'Assigned Complaints', path: '/admin/complaints/assigned', icon: <ClipboardList size={22} /> },
+          { name: 'Resolved Complaints', path: '/admin/complaints/resolved', icon: <CheckCircle size={22} /> },
           { name: 'Food Analytics', path: '/food-analytics', icon: <Utensils size={22} /> },
           { name: 'Attendance Report', path: '/attendance-report', icon: <Fingerprint size={22} /> },
           { name: 'Hostel Stats', path: '/hostel-stats', icon: <Activity size={22} /> },
-          { name: t('all_complaints'), path: '/admin-complaints', icon: <List size={22} /> },
           { name: t('manage_users'), path: '/users', icon: <Users size={22} /> },
           { name: t('manage_menu'), path: '/manage-menu', icon: <Utensils size={22} /> },
           { name: 'Reports', path: '/reports', icon: <Activity size={22} /> },
         ];
       case 'worker':
         return [
-          { name: t('my_tasks'), path: '/', icon: <Wrench size={22} /> },
-          { name: 'Completed Tasks', path: '#', icon: <Grid size={22} /> },
+          { name: 'My Dashboard', path: '/', icon: <Home size={22} /> },
+          { name: 'New Tasks', path: '/worker/tasks/pending', icon: <Clock size={22} /> },
+          { name: 'My Current Tasks', path: '/worker/tasks/assigned', icon: <ClipboardList size={22} /> },
+          { name: 'Completed Tasks', path: '/worker/tasks/resolved', icon: <CheckCircle size={22} /> },
         ];
       default:
         return [];
