@@ -36,17 +36,17 @@ const Header = ({ user }) => {
 
   return (
     <div className="top-header">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
         
         {/* Language Toggler */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Globe size={18} color="var(--text-main)" />
+          <Globe size={16} color="var(--text-main)" className="hide-mobile" />
           <select 
             onChange={changeLanguage} 
             defaultValue={i18n.language || 'en'}
             style={{ 
-              padding: '0.25rem 1.5rem 0.25rem 0.5rem', 
-              fontSize: '0.8rem', 
+              padding: '0.25rem 0.6rem', 
+              fontSize: '0.75rem', 
               borderRadius: '0.5rem',
               border: '1px solid var(--border)',
               background: 'transparent',
@@ -63,22 +63,24 @@ const Header = ({ user }) => {
         </div>
 
         {/* Theme Toggler */}
-        <button onClick={toggleTheme} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '50%', cursor: 'pointer', transition: 'all 0.2s' }}>
-          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+        <button onClick={toggleTheme} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '50%', cursor: 'pointer', transition: 'all 0.2s' }}>
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontWeight: 500, borderLeft: '1px solid var(--border)', paddingLeft: '1.5rem' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-            <User size={18} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontWeight: 500, borderLeft: '1px solid var(--border)', paddingLeft: '1rem' }}>
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+            <User size={16} />
           </div>
-          <span className="header-user-text">
-            {user.name} ({user.role})
+          <span className="header-user-text" style={{ fontSize: '0.85rem' }}>
+            {user.name}
           </span>
         </div>
+        
         {user && <NotificationBell />}
-        <button onClick={handleLogout} className="btn" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-main)' }}>
-          <LogOut size={16} />
-          Logout
+        
+        <button onClick={handleLogout} className="btn" style={{ padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-main)', fontSize: '0.75rem' }}>
+          <LogOut size={14} />
+          <span className="hide-mobile">Logout</span>
         </button>
       </div>
     </div>

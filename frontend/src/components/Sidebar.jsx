@@ -43,9 +43,9 @@ const Sidebar = ({ role }) => {
   const links = getLinks();
 
   return (
-    <div className="sidebar" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Profile Section as seen in music app */}
-      <div style={{ padding: '2.5rem 1.8rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+    <div className="sidebar">
+      {/* Profile Section - Hidden on mobile */}
+      <div className="profile-section" style={{ padding: '2.5rem 1.8rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
         <div style={{
           width: '64px', height: '64px', borderRadius: '22px', 
           background: 'linear-gradient(45deg, #9B5DE5, #F15BB5)', 
@@ -67,7 +67,7 @@ const Sidebar = ({ role }) => {
         </div>
       </div>
 
-      <div className="sidebar-nav" style={{ flex: 1 }}>
+      <div className="sidebar-nav">
         {links.map((link) => (
           <Link
             key={link.name}
@@ -75,13 +75,13 @@ const Sidebar = ({ role }) => {
             className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
           >
             {link.icon}
-            {link.name}
+            <span>{link.name}</span>
           </Link>
         ))}
       </div>
 
-      {/* Logout at bottom */}
-      <div style={{ padding: '1.5rem', marginTop: 'auto' }}>
+      {/* Logout at bottom - Hidden on mobile as it's usually in the header on mobile */}
+      <div className="logout-section" style={{ padding: '1.5rem', marginTop: 'auto' }}>
         <button 
           onClick={logout}
           style={{ 

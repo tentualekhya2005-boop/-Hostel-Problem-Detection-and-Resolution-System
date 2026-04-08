@@ -93,7 +93,7 @@ const MenuFeedbackPage = () => {
                             <Clock size={18} color="var(--text-muted)" />
                         </div>
                         
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', padding: '1.5rem' }}>
+                        <div className="grid-responsive" style={{ padding: '1.5rem' }}>
                             {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
                                 <div key={meal} style={{ padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                                     <div style={{ color: 'var(--primary)', fontWeight: 800, marginBottom: '1rem', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em' }}>{meal}</div>
@@ -108,19 +108,17 @@ const MenuFeedbackPage = () => {
                                             const currentRating = itemRatingObj ? itemRatingObj.rating : (day.ratings?.[meal] || 0);
 
                                             return (
-                                                <div key={itemIdx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: itemIdx < arr.length - 1 ? '1px dashed #e2e8f0' : 'none' }}>
+                                                <div key={itemIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem 0', borderBottom: itemIdx < arr.length - 1 ? '1px dashed #e2e8f0' : 'none' }}>
                                                     <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-main)' }}>{itemName}</span>
-                                                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                                    <div style={{ display: 'flex', gap: '0.4rem' }}>
                                                         {[1,2,3,4,5].map(star => (
                                                             <Star 
                                                                 key={star} 
-                                                                size={18} 
+                                                                size={20} 
                                                                 style={{ cursor: 'pointer', transition: 'transform 0.1s' }}
                                                                 fill={star <= currentRating ? '#FFD700' : 'transparent'}
                                                                 stroke={star <= currentRating ? '#FFD700' : '#cbd5e1'}
                                                                 onClick={() => handleRate(day.date, meal, star, itemName)}
-                                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
-                                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                             />
                                                         ))}
                                                     </div>

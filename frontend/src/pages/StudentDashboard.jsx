@@ -206,7 +206,7 @@ const StudentDashboard = () => {
     <div>
       <h1 className="page-title">{t('dashboard')}</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+      <div className="grid-responsive">
         {/* Submit Complaint Box */}
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '1.25rem' }}>
@@ -218,7 +218,7 @@ const StudentDashboard = () => {
               <input type="text" className="form-input" placeholder="e.g. Fan not working" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="grid-responsive" style={{ gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">{t('category')}</label>
                 <select className="form-select" value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -240,7 +240,7 @@ const StudentDashboard = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="grid-responsive" style={{ gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Block / Hostel</label>
                 <select className="form-select" value={block} onChange={(e) => setBlock(e.target.value)}>
@@ -282,10 +282,10 @@ const StudentDashboard = () => {
               <Calendar size={24} /> {t('todays_menu')}
             </div>
             {menu ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', fontSize: '0.8rem' }}>
+              <div className="grid-responsive" style={{ gap: '1rem', fontSize: '0.8rem' }}>
                 {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
-                  <div key={meal} style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', opacity: 0.9 }}>{meal}</div>
+                  <div key={meal} style={{ padding: '0.85rem', background: 'rgba(255,255,255,0.15)', borderRadius: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', opacity: 0.9, letterSpacing: '0.05em' }}>{meal}</div>
                     
                     {(menu[meal] || '').split(',').map((item, idx, arr) => {
                       const itemName = item.trim();
@@ -396,7 +396,7 @@ const StudentDashboard = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontWeight: 600, fontSize: '1.25rem' }}>
           <AlertCircle size={24} /> {t('recent_complaints')}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+        <div className="grid-responsive">
           {complaints.length === 0 ? (
                 <p className="text-muted">No complaints submitted yet.</p>
               ) : (
@@ -405,7 +405,7 @@ const StudentDashboard = () => {
                     display: 'flex', flexDirection: 'column', padding: '1.25rem', 
                     border: idx === 0 ? '2px solid var(--primary)' : '1px solid var(--border)', 
                     borderRadius: '0.75rem', 
-                    backgroundColor: idx === 0 ? '#f0f9ff' : 'var(--glass-bg)', 
+                    backgroundColor: idx === 0 ? 'var(--primary-light)' : 'var(--card-bg)', 
                     height: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' 
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>

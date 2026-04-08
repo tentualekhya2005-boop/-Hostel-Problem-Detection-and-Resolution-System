@@ -60,28 +60,28 @@ const ReportsPage = () => {
 
     return (
         <div className="content-area animate-fade-in">
-            <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                     <h1 className="page-title">Weekly Food Reports</h1>
                     <p className="text-muted">Summary of student feedback for the current week.</p>
                 </div>
-                <button onClick={downloadPDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <Download size={20} /> Download Report PDF
+                <button onClick={downloadPDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.6rem 1rem', fontSize: '0.8rem' }}>
+                    <Download size={18} /> <span className="hide-mobile">Download Report PDF</span><span className="show-mobile">Download PDF</span>
                 </button>
             </header>
 
             <div id="report-to-download">
                 {/* Graph Summary */}
                 <div className="card" style={{ marginBottom: '2rem' }}>
-                    <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Star color="gold" fill="gold" /> Weekly Satisfaction Comparison
+                    <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                        <Star color="gold" fill="gold" size={18} /> Weekly Satisfaction
                     </h3>
                     <div style={{ width: '100%', height: 300 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={reportData.length > 0 ? [...reportData].sort((a,b) => b.avgStars - a.avgStars).slice(0, 15) : []}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="dish" tick={{fontSize: 10}} height={60} interval={0} angle={-30} textAnchor="end" />
-                                <YAxis domain={[0, 5]} />
+                                <XAxis dataKey="dish" tick={{fontSize: 9}} height={60} interval={0} angle={-30} textAnchor="end" />
+                                <YAxis domain={[0, 5]} tick={{fontSize: 10}} />
                                 <Tooltip />
                                 <Bar dataKey="avgStars" name="Average Stars">
                                     {(reportData.length > 0 ? [...reportData].sort((a,b) => b.avgStars - a.avgStars).slice(0, 15) : []).map((entry, index) => (
@@ -93,11 +93,11 @@ const ReportsPage = () => {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div className="grid-responsive" style={{ gap: '1.5rem' }}>
                     {/* Low Rating Report */}
                     <div className="card" style={{ borderTop: '5px solid #ef4444' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ef4444', fontWeight: 800, marginBottom: '1.5rem', fontSize: '1.2rem' }}>
-                            <TrendingDown size={24} /> IMPROVEMENT NEEDED ({"<"} 3 Stars)
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ef4444', fontWeight: 800, marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+                            <TrendingDown size={22} /> IMPROVEMENT NEEDED
                         </div>
                         {lowRated.length > 0 ? (
                             <div className="table-responsive">
@@ -121,7 +121,7 @@ const ReportsPage = () => {
                                                         <Star size={14} fill="gold" color="gold" /> {item.avgStars}
                                                     </div>
                                                 </td>
-                                                <td><span className="badge badge-rejected">Poor</span></td>
+                                                <td><span className="badge badge-danger">Poor</span></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -132,8 +132,8 @@ const ReportsPage = () => {
 
                     {/* High Rating Report */}
                     <div className="card" style={{ borderTop: '5px solid #10b981' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#10b981', fontWeight: 800, marginBottom: '1.5rem', fontSize: '1.2rem' }}>
-                            <TrendingUp size={24} /> TOP PERFORMERS ({">="} 3 Stars)
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#10b981', fontWeight: 800, marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+                            <TrendingUp size={22} /> TOP PERFORMERS
                         </div>
                         {highRated.length > 0 ? (
                             <div className="table-responsive">

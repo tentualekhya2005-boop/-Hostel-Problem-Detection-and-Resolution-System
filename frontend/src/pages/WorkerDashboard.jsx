@@ -79,7 +79,7 @@ const WorkerDashboard = () => {
         {tasks.length === 0 ? (
           <p className="text-muted">You have no assigned tasks right now.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+          <div className="grid-responsive">
             {tasks.map(task => (
               <div key={task._id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -92,7 +92,7 @@ const WorkerDashboard = () => {
 
                 {/* Location Details */}
                 <div style={{ 
-                  display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', 
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '0.5rem', 
                   backgroundColor: 'var(--primary-light)', borderRadius: '0.65rem',
                   padding: '0.85rem', marginBottom: '1rem'
                 }}>

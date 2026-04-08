@@ -239,7 +239,7 @@ const AdminDashboard = () => {
       {location.pathname === '/attendance-report' ? (
         <div className="animate-fade-in">
           {/* Year-wise summary cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+          <div className="grid-stats" style={{ marginBottom: '2rem' }}>
             {(attendanceData.yearStats || []).map(stat => (
               <div key={stat.year} className="card" style={{ padding: '1.5rem', textAlign: 'center', borderBottom: '4px solid var(--primary)' }}>
                 <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>{stat.year}</div>
@@ -254,30 +254,30 @@ const AdminDashboard = () => {
           </div>
 
           <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
-              <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', mdDirection: 'row', gap: '1rem', justifyContent: 'space-between', marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <button 
                     onClick={() => setAttendanceSubTab('present')}
                     className={`btn ${attendanceSubTab === 'present' ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ borderRadius: '0.75rem', padding: '0.6rem 1.5rem' }}
+                    style={{ borderRadius: '0.75rem', padding: '0.6rem 1.25rem' }}
                 >
-                    ✅ Present Sheet
+                    ✅ <span className="hide-mobile">Present Sheet</span><span className="show-mobile">Present</span>
                 </button>
                 <button 
                     onClick={() => setAttendanceSubTab('absent')}
                     className={`btn ${attendanceSubTab === 'absent' ? 'btn-danger' : 'btn-secondary'}`}
                     style={{ 
-                        borderRadius: '0.75rem', padding: '0.6rem 1.5rem',
+                        borderRadius: '0.75rem', padding: '0.6rem 1.25rem',
                         background: attendanceSubTab === 'absent' ? '#ef4444' : '',
                         color: attendanceSubTab === 'absent' ? 'white' : ''
                     }}
                 >
-                    ❌ Absent Sheet
+                    ❌ <span className="hide-mobile">Absent Sheet</span><span className="show-mobile">Absent</span>
                 </button>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>{attendanceData.date}</div>
-                <div style={{ fontSize: '1rem', fontWeight: 800 }}>Overall: {attendanceData.presentCount} / {attendanceData.totalStudents}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Overall: {attendanceData.presentCount} / {attendanceData.totalStudents}</div>
               </div>
             </div>
 
@@ -335,30 +335,30 @@ const AdminDashboard = () => {
         </div>
       ) : (
       <div id="report-content" style={{ padding: '10px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #4F46E5', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Total Complaints</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#4F46E5' }}>{cardStats.total}</div>
+        <div className="grid-stats" style={{ marginBottom: '2rem' }}>
+          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #4F46E5', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Total Complaints</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#4F46E5' }}>{cardStats.total}</div>
           </div>
-          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #F59E0B', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Pending Actions</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#F59E0B' }}>{cardStats.pending}</div>
+          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F59E0B', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Pending Actions</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F59E0B' }}>{cardStats.pending}</div>
           </div>
-          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #06B6D4', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>In Progress</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#06B6D4' }}>{cardStats.assigned}</div>
+          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #06B6D4', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>In Progress</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#06B6D4' }}>{cardStats.assigned}</div>
           </div>
-          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #F472B6', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Needs Verification</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#F472B6' }}>{cardStats.needsVerification}</div>
+          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F472B6', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Needs Verification</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F472B6' }}>{cardStats.needsVerification}</div>
           </div>
-          <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #10B981', background: 'white' }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Closed / Resolved</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10B981' }}>{cardStats.resolved}</div>
+          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #10B981', background: 'white' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Closed / Resolved</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10B981' }}>{cardStats.resolved}</div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+        <div className="grid-responsive" style={{ marginBottom: '2rem' }}>
           {/* Complaint Analytics */}
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
@@ -385,16 +385,16 @@ const AdminDashboard = () => {
 
           {/* Menu Ratings Analytics */}
           <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1.25rem' }}>
-                <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction Score (%)
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1.1rem' }}>
+                <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction
               </div>
               <button 
                 onClick={() => window.location.href='/reports'} 
                 className="btn btn-secondary" 
-                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', borderRadius: '8px' }}
+                style={{ fontSize: '0.7rem', padding: '0.4rem 0.6rem', borderRadius: '8px' }}
               >
-                View Weekly Reports &rarr;
+                Reports &rarr;
               </button>
             </div>
             <div style={{ width: '100%', height: 300 }}>
@@ -402,10 +402,10 @@ const AdminDashboard = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={menuRatings} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12}} />
-                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 12}} unit="%" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} unit="%" />
                     <RechartsTooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
-                    <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={40} />
+                    <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={25} />
                     <defs>
                       <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#9B5DE5" />
@@ -417,7 +417,6 @@ const AdminDashboard = () => {
               ) : (
                 <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--text-muted)' }}>
                   <p>No student ratings for today yet.</p>
-                  <p style={{fontSize: '0.8rem', marginTop: '0.5rem'}}>Averages will appear once students rate meals.</p>
                 </div>
               )}
             </div>
@@ -430,7 +429,7 @@ const AdminDashboard = () => {
             <AlertTriangle size={24} color="var(--primary)" /> All Complaints
           </div>
           
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-responsive">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)' }}>
@@ -533,102 +532,110 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Update Menu Widget */}
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <Calendar size={24} color="var(--primary)" /> Update Daily Menu
+        <div className="grid-responsive">
+          {/* Update Menu Widget */}
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+              <Calendar size={24} color="var(--primary)" /> Update Daily Menu
+            </div>
+            <form onSubmit={handleMenuSubmit}>
+              <div className="form-group">
+                <label className="form-label">Date</label>
+                <input type="date" className="form-input" value={menuDate} onChange={(e) => setMenuDate(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Breakfast</label>
+                <input type="text" className="form-input" value={menu.breakfast} onChange={(e) => setMenu({...menu, breakfast: e.target.value})} required />
+              </div>
+              <div className="grid-responsive" style={{ gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Lunch</label>
+                  <input type="text" className="form-input" value={menu.lunch} onChange={(e) => setMenu({...menu, lunch: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Snacks</label>
+                  <input type="text" className="form-input" value={menu.snacks} onChange={(e) => setMenu({...menu, snacks: e.target.value})} required />
+                </div>
+              </div>
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Dinner</label>
+                <input type="text" className="form-input" value={menu.dinner} onChange={(e) => setMenu({...menu, dinner: e.target.value})} required />
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Menu</button>
+            </form>
           </div>
-          <form onSubmit={handleMenuSubmit}>
-            <div className="form-group">
-              <label className="form-label">Date</label>
-              <input type="date" className="form-input" value={menuDate} onChange={(e) => setMenuDate(e.target.value)} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Breakfast</label>
-              <input type="text" className="form-input" value={menu.breakfast} onChange={(e) => setMenu({...menu, breakfast: e.target.value})} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Lunch</label>
-              <input type="text" className="form-input" value={menu.lunch} onChange={(e) => setMenu({...menu, lunch: e.target.value})} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Snacks</label>
-              <input type="text" className="form-input" value={menu.snacks} onChange={(e) => setMenu({...menu, snacks: e.target.value})} required />
-            </div>
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">Dinner</label>
-              <input type="text" className="form-input" value={menu.dinner} onChange={(e) => setMenu({...menu, dinner: e.target.value})} required />
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Menu</button>
-          </form>
-        </div>
 
-        {/* Register Worker Widget */}
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <UserPlus size={24} color="var(--primary)" /> Register New Worker
+          {/* Register Worker Widget */}
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+              <UserPlus size={24} color="var(--primary)" /> Register New Worker
+            </div>
+            <form onSubmit={handleAddWorker} autoComplete="off">
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input type="text" className="form-input" value={newWorker.name} onChange={e=>setNewWorker({...newWorker, name: e.target.value})} required autoComplete="new-password" />
+              </div>
+              <div className="grid-responsive" style={{ gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input type="email" className="form-input" value={newWorker.email} onChange={e=>setNewWorker({...newWorker, email: e.target.value})} required autoComplete="new-password" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input type="password" className="form-input" value={newWorker.password} onChange={e=>setNewWorker({...newWorker, password: e.target.value})} required minLength={6} autoComplete="new-password" />
+                </div>
+              </div>
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Skills (comma separated)</label>
+                <input type="text" className="form-input" value={newWorker.skills} onChange={e=>setNewWorker({...newWorker, skills: e.target.value})} required autoComplete="new-password" />
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register Worker</button>
+            </form>
           </div>
-          <form onSubmit={handleAddWorker} autoComplete="off">
-            <div className="form-group">
-              <label className="form-label">Name</label>
-              <input type="text" className="form-input" value={newWorker.name} onChange={e=>setNewWorker({...newWorker, name: e.target.value})} required autoComplete="new-password" />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input type="email" className="form-input" value={newWorker.email} onChange={e=>setNewWorker({...newWorker, email: e.target.value})} required autoComplete="new-password" />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input type="password" className="form-input" value={newWorker.password} onChange={e=>setNewWorker({...newWorker, password: e.target.value})} required minLength={6} autoComplete="new-password" />
-            </div>
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">Skills (comma separated)</label>
-              <input type="text" className="form-input" value={newWorker.skills} onChange={e=>setNewWorker({...newWorker, skills: e.target.value})} required autoComplete="new-password" />
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register Worker</button>
-          </form>
-        </div>
 
-        {/* Update Hostel Occupancy Stats Widget */}
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-            <BarChart3 size={24} color="var(--primary)" /> Update Hostel Occupancy
+          {/* Update Hostel Occupancy Stats Widget */}
+          <div className="card" style={{ gridColumn: '1 / -1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+              <BarChart3 size={24} color="var(--primary)" /> Update Hostel Occupancy
+            </div>
+            <form onSubmit={handleStatsSubmit}>
+              <div className="grid-responsive" style={{ gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">1st Year Students (Occupied / Capacity)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year1} onChange={(e) => setStats({...stats, year1: Number(e.target.value)})} required />
+                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year1Total} onChange={(e) => setStats({...stats, year1Total: Number(e.target.value)})} required />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">2nd Year Students (Occupied / Capacity)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year2} onChange={(e) => setStats({...stats, year2: Number(e.target.value)})} required />
+                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year2Total} onChange={(e) => setStats({...stats, year2Total: Number(e.target.value)})} required />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">3rd Year Students (Occupied / Capacity)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year3} onChange={(e) => setStats({...stats, year3: Number(e.target.value)})} required />
+                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year3Total} onChange={(e) => setStats({...stats, year3Total: Number(e.target.value)})} required />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">4th Year Students (Occupied / Capacity)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year4} onChange={(e) => setStats({...stats, year4: Number(e.target.value)})} required />
+                    <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
+                    <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year4Total} onChange={(e) => setStats({...stats, year4Total: Number(e.target.value)})} required />
+                  </div>
+                </div>
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem' }}>Save Stats</button>
+            </form>
           </div>
-          <form onSubmit={handleStatsSubmit}>
-            <div className="form-group">
-              <label className="form-label">1st Year Students (Occupied / Capacity)</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year1} onChange={(e) => setStats({...stats, year1: Number(e.target.value)})} required />
-                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year1Total} onChange={(e) => setStats({...stats, year1Total: Number(e.target.value)})} required />
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">2nd Year Students (Occupied / Capacity)</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year2} onChange={(e) => setStats({...stats, year2: Number(e.target.value)})} required />
-                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year2Total} onChange={(e) => setStats({...stats, year2Total: Number(e.target.value)})} required />
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">3rd Year Students (Occupied / Capacity)</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year3} onChange={(e) => setStats({...stats, year3: Number(e.target.value)})} required />
-                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year3Total} onChange={(e) => setStats({...stats, year3Total: Number(e.target.value)})} required />
-              </div>
-            </div>
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">4th Year Students (Occupied / Capacity)</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input type="number" className="form-input" min="0" placeholder="Occupied" value={stats.year4} onChange={(e) => setStats({...stats, year4: Number(e.target.value)})} required />
-                <span style={{ display: 'flex', alignItems: 'center' }}>/</span>
-                <input type="number" className="form-input" min="0" placeholder="Capacity" value={stats.year4Total} onChange={(e) => setStats({...stats, year4Total: Number(e.target.value)})} required />
-              </div>
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Stats</button>
-          </form>
         </div>
 
         {/* Send Announcement Widget */}
