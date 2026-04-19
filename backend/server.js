@@ -26,8 +26,8 @@ app.use(cors({
         if (allowedOrigins.indexOf(origin) !== -1) {
             return callback(null, true);
         }
-        // Allow any netlify.app subdomain
-        if (origin.endsWith('.netlify.app')) {
+        // Allow any netlify.app or vercel.app subdomain
+        if (origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app')) {
             return callback(null, true);
         }
         callback(new Error(`CORS blocked: ${origin}`));

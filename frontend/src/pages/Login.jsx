@@ -35,7 +35,9 @@ const Login = () => {
           localStorage.setItem('user', JSON.stringify(data));
           window.location.href = '/'; // Hard reload to pick up context
         } catch (err) {
-          toast.error("Failed to map Google login to local server!");
+          console.error("Full Sync Error:", err);
+          const errorMsg = err.response?.data?.message || err.message || "Unknown server error";
+          toast.error("Bridge Error: " + errorMsg);
           setLoading(false);
         }
       }
