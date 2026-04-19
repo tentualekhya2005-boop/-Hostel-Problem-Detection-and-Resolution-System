@@ -1,11 +1,13 @@
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { useClerk } from '@clerk/clerk-react';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { signOut } = useClerk();
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -37,9 +39,14 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
         setUser(null);
         localStorage.removeItem('user');
+        try {
+            await signOut();
+        } catch (error) {
+            console.error("Clerk logout failed or not active:", error);
+        }
     };
 
     return (
