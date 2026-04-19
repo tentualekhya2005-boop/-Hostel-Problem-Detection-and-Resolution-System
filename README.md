@@ -5,9 +5,7 @@
 A comprehensive MERN stack application designed to manage, track, and resolve hostel-related issues efficiently. It provides dedicated interfaces for Admins, Students, and Staff/Workers, streamlining communication and issue resolution within hostel environments.
 
 ## 🎥 Project Demo 
-<video src="./demo.mp4" width="100%" controls>
-  Your browser does not support the video tag.
-</video>
+![Project Demo Video](./demo.mp4)
 
 ## Project Structure
 ```text
