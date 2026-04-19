@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { LogIn } from 'lucide-react';
+import { useUser, useAuth, SignInButton } from '@clerk/clerk-react';
+import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +12,36 @@ const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    // If Clerk successfully signs them in with Google, register/login them to our local DB!
+    const syncClerkToLocal = async () => {
+      if (isSignedIn && user) {
+        setLoading(true);
+        try {
+          const email = user.primaryEmailAddress.emailAddress;
+          const clerkToken = await getToken();
+          
+          const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001';
+          const { data } = await axios.post(`${baseUrl}/api/auth/google-login`, { 
+            email, 
+            name: user.fullName,
+            clerkToken 
+          });
+
+          // Hacky way to inject it directly into the AuthContext locally since it expects a JWT
+          localStorage.setItem('user', JSON.stringify(data));
+          window.location.href = '/'; // Hard reload to pick up context
+        } catch (err) {
+          toast.error("Failed to map Google login to local server!");
+          setLoading(false);
+        }
+      }
+    };
+    syncClerkToLocal();
+  }, [isSignedIn, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,10 +95,24 @@ const Login = () => {
               required 
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }} disabled={loading}>
             {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
+
+        <div style={{ position: 'relative', textAlign: 'center', margin: '1.5rem 0' }}>
+            <hr style={{ border: 'none', borderTop: '1px solid var(--border)' }} />
+            <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'var(--bg-secondary)', padding: '0 0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>OR</span>
+        </div>
+
+        {!isSignedIn && (
+          <SignInButton mode="modal">
+            <button className="btn" style={{ width: '100%', backgroundColor: 'white', color: '#333', border: '1px solid #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 600 }}>
+              <img src="https://lh3.googleusercontent.com/COxitqgJr1sJnIDe8-jiKhxDx1FrYbtRHKJ9z_hELisAlapwE9LUPh6fcXIfb5vwpbMl4xl9H9TRFPc5NOO8Sb3VSgIBrfRYvW6cUA" alt="Google" style={{ width: '18px', height: '18px' }} />
+              Continue with Google
+            </button>
+          </SignInButton>
+        )}
         
         <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
           Don't have an account? <Link to="/register" style={{ fontWeight: 500 }}>Register here</Link>

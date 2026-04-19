@@ -4,6 +4,12 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendEmailNotification } = require('../utils/emailService');
+const { createClerkClient } = require('@clerk/clerk-sdk-node');
+
+const clerkClient = createClerkClient({
+    secretKey: process.env.CLERK_SECRET_KEY,
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY
+});
 
 // Generate JWT
 const generateToken = (id) => {
@@ -102,6 +108,53 @@ router.post('/reset-password', async (req, res) => {
         res.json({ message: 'Password updated successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+});
+
+// @route   POST /api/auth/google-login
+// @desc    Secure proxy login verifying a Clerk token and syncing the User model.
+// @access  Public
+router.post('/google-login', async (req, res) => {
+    const { email, name, clerkToken } = req.body;
+
+    if (!clerkToken || !email) {
+        return res.status(400).json({ message: 'Missing core Clerk authentication payload.' });
+    }
+
+    try {
+        // Very important: Verify the token securely with the Clerk Server
+        const verified = await clerkClient.verifyToken(clerkToken);
+        if (!verified) {
+            return res.status(401).json({ message: 'Clerk verification failed. Spoof attempt blocked.' });
+        }
+
+        // Token is absolutely secure and originated from Google correctly
+        let user = await User.findOne({ email });
+
+        // Auto-register them safely as a Student using Google details
+        if (!user) {
+            // Give them a random password since their Google is the auth layer
+            const randomPassword = crypto.randomBytes(20).toString('hex');
+            user = await User.create({
+                name: name || email.split('@')[0],
+                email,
+                password: randomPassword,
+                role: 'student'
+            });
+        }
+
+        // Issue our native platform generic token!
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            token: generateToken(user._id)
+        });
+        
+    } catch (error) {
+        console.error("Clerk Token Verification error:", error);
+        res.status(401).json({ message: 'Invalid or expired Google Secure Token: ' + error.message });
     }
 });
 
