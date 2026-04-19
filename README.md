@@ -1,6 +1,6 @@
 # Hostel Problem Detection and Resolution System
 
-🚀 **Live Deployment:** [Hostel Portal (Vercel)](https://hostel-problem-detection-and-resolution-system-7bjpkzii9.vercel.app/login)
+🚀 **Live Deployment:**https://hostel-problem-detection-and-resolu.vercel.app/
 
 A comprehensive MERN stack application designed to manage, track, and resolve hostel-related issues efficiently. It provides dedicated interfaces for Admins, Students, and Staff/Workers, streamlining communication and issue resolution within hostel environments.
 
