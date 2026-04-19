@@ -25,7 +25,7 @@ const UpdatePage = () => {
 
   const fetchCurrentStats = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/stats`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/stats`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setStats(data);
@@ -36,7 +36,7 @@ const UpdatePage = () => {
     e.preventDefault();
     setMenuLoading(true);
     try {
-      await axios.post(`http://127.0.0.1:5001/api/menu`, { date: menuDate, ...menu }, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/menu`, { date: menuDate, ...menu }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('✅ Daily menu updated successfully!');
@@ -50,7 +50,7 @@ const UpdatePage = () => {
     e.preventDefault();
     setStatsLoading(true);
     try {
-      await axios.post(`http://127.0.0.1:5001/api/stats`, stats, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/stats`, stats, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('✅ Hostel occupancy updated successfully!');

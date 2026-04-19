@@ -31,7 +31,7 @@ const StudentDashboard = ({ filterStatus }) => {
     if (!url) return null;
     const trimmed = url.trim();
     if (trimmed.toLowerCase().startsWith('http')) return trimmed;
-    const baseUrl = 'http://127.0.0.1:5001';
+    const baseUrl = import.meta.env.VITE_API_URL;
     
     // Encode components to handle spaces and parentheses safely
     const parts = trimmed.split('/');
@@ -54,7 +54,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const fetchMyTodayRating = async () => {
     const today = new Date().toISOString().split('T')[0];
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/menu/my-rating/${today}`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/menu/my-rating/${today}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMyRatings(data);
@@ -64,7 +64,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const handleRate = async (meal, rating, itemName) => {
     const today = new Date().toISOString().split('T')[0];
     try {
-      await axios.post(`http://127.0.0.1:5001/api/menu/rate`, { date: today, meal, rating, itemName }, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/menu/rate`, { date: today, meal, rating, itemName }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       
@@ -83,7 +83,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchAnnouncements = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/announcements`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/announcements`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setAnnouncements(data);
@@ -94,7 +94,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const handleDeleteAnnouncement = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:5001/api/announcements/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/announcements/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Announcement deleted');
@@ -104,7 +104,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchTodayMenu = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/menu/today`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/menu/today`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMenu(data);
@@ -116,7 +116,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const toggleFavorite = async (item) => {
     if (!item) return;
     try {
-      const { data } = await axios.put(`http://127.0.0.1:5001/api/users/favorites`, { item }, {
+      const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/favorites`, { item }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setUserFavorites(data);
@@ -130,7 +130,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchUserFavorites = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/users/me`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setUserFavorites(data.favorites || []);
@@ -141,7 +141,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchStats = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/stats`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/stats`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setStats(data);
@@ -150,7 +150,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchMyComplaints = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/complaints/student`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/complaints/student`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setComplaints(data);
@@ -161,7 +161,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const handleVerify = async (id, isResolved) => {
     try {
-      await axios.put(`http://127.0.0.1:5001/api/complaints/${id}/verify-resolution`, { isResolved }, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/complaints/${id}/verify-resolution`, { isResolved }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success(isResolved ? 'Confirmed as resolved!' : 'Sent back to worker!');
@@ -184,7 +184,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
     try {
       console.log("Sending Student DELETE request...");
-      await axios.delete(`http://127.0.0.1:5001/api/complaints/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/complaints/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Complaint deleted from your list');
@@ -211,7 +211,7 @@ const StudentDashboard = ({ filterStatus }) => {
     if (image) formData.append('image', image);
 
     try {
-      await axios.post(`http://127.0.0.1:5001/api/complaints`, formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/complaints`, formData, {
         headers: { 
           Authorization: `Bearer ${user.token}`
         }

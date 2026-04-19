@@ -14,7 +14,7 @@ const WorkerRegistrationPage = () => {
 
   const fetchWorkers = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/users/workers`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/workers`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setWorkers(data);
@@ -25,7 +25,7 @@ const WorkerRegistrationPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`http://127.0.0.1:5001/api/users/worker`,
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/users/worker`,
         { ...newWorker, skills: newWorker.skills.split(',').map(s => s.trim()) }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });

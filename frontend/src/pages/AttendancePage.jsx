@@ -21,7 +21,7 @@ const AttendancePage = () => {
 
   const checkBiometricStatus = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/users/profile`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setIsBiometricEnrolled(data.biometricRegistered);
@@ -52,7 +52,7 @@ const AttendancePage = () => {
 
     try {
       // Direct call using Port 5001 for stability
-      await axios.post('http://127.0.0.1:5001/api/users/biometric/register', { 
+      await axios.post('${import.meta.env.VITE_API_URL}/api/users/biometric/register', { 
         deviceSignature 
       }, {
         headers: { Authorization: `Bearer ${user.token}` }
@@ -71,7 +71,7 @@ const AttendancePage = () => {
 
   const checkToday = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/attendance/my-record`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/attendance/my-record`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const today = new Date().toISOString().split('T')[0];
@@ -111,7 +111,7 @@ const AttendancePage = () => {
     const deviceSignature = getDeviceFingerprint();
 
     try {
-      await axios.post(`http://127.0.0.1:5001/api/attendance/mark`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/attendance/mark`, {
         ...coords,
         deviceSignature
       }, {

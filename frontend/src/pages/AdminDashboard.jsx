@@ -40,7 +40,7 @@ const AdminDashboard = ({ filterStatus }) => {
     if (!url) return null;
     const trimmed = url.trim();
     if (trimmed.toLowerCase().startsWith('http')) return trimmed;
-    const baseUrl = 'http://127.0.0.1:5001';
+    const baseUrl = import.meta.env.VITE_API_URL;
     
     // Encode components to handle spaces and parentheses safely
     const parts = trimmed.split('/');
@@ -63,7 +63,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchMenuRatings = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/menu/ratings/today`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/menu/ratings/today`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMenuRatings(data);
@@ -72,7 +72,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchAttendance = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/attendance/daily-report`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/attendance/daily-report`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setAttendanceData(data);
@@ -83,7 +83,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchStats = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/stats`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/stats`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setStats(data);
@@ -92,7 +92,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchComplaints = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/complaints/all`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/complaints/all`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setComplaints(data);
@@ -101,7 +101,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchWorkers = async () => {
     try {
-      const { data } = await axios.get(`http://127.0.0.1:5001/api/users/workers`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/workers`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setWorkers(data);
@@ -110,7 +110,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const handleAssignWorker = async (complaintId, workerId) => {
     try {
-      await axios.put(`http://127.0.0.1:5001/api/complaints/${complaintId}/assign`, { workerId }, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/complaints/${complaintId}/assign`, { workerId }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Worker assigned!');
@@ -120,7 +120,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const handleAdminAction = async (id, action) => {
     try {
-      await axios.put(`http://127.0.0.1:5001/api/complaints/${id}/admin-resolve`, { action }, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/complaints/${id}/admin-resolve`, { action }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success(action === 'Resolve' ? 'Complaint finalized and closed!' : 'Re-assigned to worker.');
@@ -145,7 +145,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
     try {
       console.log("Sending DELETE request to server...");
-      const response = await axios.delete(`http://127.0.0.1:5001/api/complaints/admin/${id}`, {
+      const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/complaints/admin/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       console.log("Delete response:", response.data);
@@ -163,7 +163,7 @@ const AdminDashboard = ({ filterStatus }) => {
   const handleMenuSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://127.0.0.1:5001/api/menu`, { date: menuDate, ...menu }, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/menu`, { date: menuDate, ...menu }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Menu updated successfully');
@@ -174,7 +174,7 @@ const AdminDashboard = ({ filterStatus }) => {
   const handleAddWorker = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://127.0.0.1:5001/api/auth/register-worker`, { ...newWorker, skills: newWorker.skills.split(',').map(s=>s.trim()) }, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register-worker`, { ...newWorker, skills: newWorker.skills.split(',').map(s=>s.trim()) }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Worker registered successfully');
@@ -186,7 +186,7 @@ const AdminDashboard = ({ filterStatus }) => {
   const handleSendAnnouncement = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://127.0.0.1:5001/api/announcements`, announcement, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/announcements`, announcement, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Announcement broadcasted successfully');
