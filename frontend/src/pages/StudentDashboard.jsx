@@ -397,6 +397,29 @@ const StudentDashboard = ({ filterStatus }) => {
                     </div>
                   )}
 
+                  {comp.resolvedImageUrl && (
+                    <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+                      <strong style={{ display: 'block', fontSize: '0.8rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Worker Resolution Photo:</strong>
+                      <div style={{ 
+                        position: 'relative', 
+                        borderRadius: '1rem', 
+                        overflow: 'hidden', 
+                        width: '100%',
+                        maxWidth: '240px', 
+                        aspectRatio: '1/1',
+                        margin: '0 auto', 
+                        border: '4px solid var(--success)',
+                        boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
+                      }}>
+                        <img 
+                          src={getFullImageUrl(comp.resolvedImageUrl)} 
+                          alt="Resolved" 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {comp.status === 'Needs Verification' && (
                     <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--primary-light)', borderRadius: '0.75rem', border: '1px solid var(--primary)' }}>
                       <p style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--primary-dark)' }}>Is this problem fixed?</p>
@@ -481,6 +504,25 @@ const StudentDashboard = ({ filterStatus }) => {
                       <a href={getFullImageUrl(comp.imageUrl)} target="_blank" rel="noopener noreferrer">
                         <img src={getFullImageUrl(comp.imageUrl)} alt="Issue" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </a>
+                    </div>
+                  )}
+
+                   {comp.resolvedImageUrl && (
+                    <div style={{ marginBottom: '1.25rem', textAlign: 'center' }}>
+                      <strong style={{ display: 'block', fontSize: '0.8rem', color: 'var(--success)', marginBottom: '0.5rem' }}>✅ Worker Resolution Photo:</strong>
+                      <div style={{ 
+                        width: '100%', 
+                        maxWidth: '180px', 
+                        aspectRatio: '1/1', 
+                        overflow: 'hidden', 
+                        borderRadius: '1rem', 
+                        border: '3px solid var(--success)',
+                        margin: '0 auto'
+                      }}>
+                        <a href={getFullImageUrl(comp.resolvedImageUrl)} target="_blank" rel="noopener noreferrer">
+                          <img src={getFullImageUrl(comp.resolvedImageUrl)} alt="Resolved" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </a>
+                      </div>
                     </div>
                   )}
                   
