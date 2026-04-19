@@ -52,7 +52,7 @@ const AttendancePage = () => {
 
     try {
       // Direct call using Port 5001 for stability
-      await axios.post('${import.meta.env.VITE_API_URL}/api/users/biometric/register', { 
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/users/biometric/register`, { 
         deviceSignature 
       }, {
         headers: { Authorization: `Bearer ${user.token}` }
