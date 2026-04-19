@@ -113,7 +113,7 @@ const WorkerDashboard = ({ filterStatus }) => {
         }).length === 0 ? (
           <p className="text-muted">No {filterStatus?.toLowerCase() || ''} tasks found.</p>
         ) : (
-          <div className="grid-responsive">
+          <div className="grid-cards">
             {tasks.filter(t => {
                 if (!filterStatus) return true;
                 if (filterStatus === 'Pending') return t.status === 'Assigned';
