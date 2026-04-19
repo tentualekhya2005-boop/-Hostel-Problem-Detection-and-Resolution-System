@@ -194,12 +194,12 @@ const NotificationBell = () => {
                   style={{
                     padding: '0.875rem 1.25rem',
                     borderBottom: '1px solid var(--border)',
-                    backgroundColor: n.read ? 'transparent' : '#f0f4ff',
+                    backgroundColor: n.read ? 'transparent' : 'var(--primary-light)',
                     cursor: 'pointer',
                     transition: 'background 0.15s',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = n.read ? '#f9fafb' : '#e8eeff'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = n.read ? 'transparent' : '#f0f4ff'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = n.read ? 'var(--bg-secondary)' : 'rgba(176, 132, 1, 0.2)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = n.read ? 'transparent' : 'var(--primary-light)'}
                 >
                   <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                     <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{getTypeIcon(n.type)}</span>

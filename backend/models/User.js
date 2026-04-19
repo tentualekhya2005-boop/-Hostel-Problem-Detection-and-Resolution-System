@@ -12,7 +12,9 @@ const userSchema = new mongoose.Schema({
     skills: [{ type: String }], // For workers
     favorites: [{ type: String }], // Quick heart items (meals)
     otp: { type: String },
-    otpExpires: { type: Date }
+    otpExpires: { type: Date },
+    biometricRegistered: { type: Boolean, default: false },
+    biometricKey: { type: String }
 }, { timestamps: true });
 
 // Hash password before saving

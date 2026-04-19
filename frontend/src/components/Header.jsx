@@ -35,7 +35,7 @@ const Header = ({ user }) => {
   };
 
   return (
-    <div className="top-header">
+    <div className="top-header glass" style={{ background: 'var(--glass-bg)', borderBottom: '1px solid var(--border)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
         
         {/* Language Toggler */}
@@ -78,8 +78,27 @@ const Header = ({ user }) => {
         
         {user && <NotificationBell />}
         
-        <button onClick={handleLogout} className="btn" style={{ padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid var(--border)', backgroundColor: 'transparent', color: 'var(--text-main)', fontSize: '0.75rem' }}>
-          <LogOut size={14} />
+        <button 
+          onClick={handleLogout} 
+          className="btn" 
+          style={{ 
+            padding: '0.5rem 1rem', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            background: 'var(--gradient-btn)', 
+            color: 'white', 
+            border: 'none',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            borderRadius: '0.6rem',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+            transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <LogOut size={16} />
           <span className="hide-mobile">Logout</span>
         </button>
       </div>

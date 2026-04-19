@@ -34,13 +34,21 @@ const AdminDashboard = ({ filterStatus }) => {
   });
   const [attendanceSubTab, setAttendanceSubTab] = useState('present'); // 'present' or 'absent'
   const [menuRatings, setMenuRatings] = useState([]);
+  const [confirmingId, setConfirmingId] = useState(null);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
     const trimmed = url.trim();
     if (trimmed.toLowerCase().startsWith('http')) return trimmed;
-    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/['"]/g, '').replace(/\/$/, '');
-    return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
+    const baseUrl = 'http://127.0.0.1:5001';
+    
+    // Encode components to handle spaces and parentheses safely
+    const parts = trimmed.split('/');
+    const filename = parts.pop();
+    const encodedFilename = encodeURIComponent(filename);
+    const path = [...parts, encodedFilename].join('/');
+    
+    return `${baseUrl}/${path.replace(/^\//, '')}`;
   };
 
   useEffect(() => {
@@ -55,7 +63,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchMenuRatings = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/ratings/today`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/menu/ratings/today`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMenuRatings(data);
@@ -64,7 +72,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchAttendance = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/daily-report`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/attendance/daily-report`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setAttendanceData(data);
@@ -75,7 +83,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchStats = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/stats`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setStats(data);
@@ -84,7 +92,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchComplaints = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/all`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/complaints/all`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setComplaints(data);
@@ -93,7 +101,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const fetchWorkers = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/workers`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/users/workers`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setWorkers(data);
@@ -102,7 +110,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const handleAssignWorker = async (complaintId, workerId) => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${complaintId}/assign`, { workerId }, {
+      await axios.put(`http://127.0.0.1:5001/api/complaints/${complaintId}/assign`, { workerId }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Worker assigned!');
@@ -112,7 +120,7 @@ const AdminDashboard = ({ filterStatus }) => {
 
   const handleAdminAction = async (id, action) => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}/admin-resolve`, { action }, {
+      await axios.put(`http://127.0.0.1:5001/api/complaints/${id}/admin-resolve`, { action }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success(action === 'Resolve' ? 'Complaint finalized and closed!' : 'Re-assigned to worker.');
@@ -121,20 +129,41 @@ const AdminDashboard = ({ filterStatus }) => {
   };
 
   const handleAdminDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to completely delete this complaint from all dashboards?")) return;
+    console.log("Delete triggered for ID:", id);
+    if (!id) {
+      toast.error("Error: Complaint ID is missing");
+      return;
+    }
+
+    // Two-step confirmation logic
+    if (confirmingId !== id) {
+      setConfirmingId(id);
+      // Reset after 3 seconds if not confirmed
+      setTimeout(() => setConfirmingId(prev => prev === id ? null : prev), 3000);
+      return;
+    }
+
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/admin/${id}`, {
+      console.log("Sending DELETE request to server...");
+      const response = await axios.delete(`http://127.0.0.1:5001/api/complaints/admin/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
+      console.log("Delete response:", response.data);
       toast.success('Complaint permanently deleted');
+      setConfirmingId(null);
       fetchComplaints();
-    } catch (error) { toast.error('Failed to delete complaint'); }
+    } catch (error) { 
+      console.error("Delete error:", error);
+      const msg = error.response?.data?.message || error.message;
+      toast.error(`Deletion failed: ${msg}`); 
+      setConfirmingId(null);
+    }
   };
 
   const handleMenuSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu`, { date: menuDate, ...menu }, {
+      await axios.post(`http://127.0.0.1:5001/api/menu`, { date: menuDate, ...menu }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Menu updated successfully');
@@ -145,8 +174,7 @@ const AdminDashboard = ({ filterStatus }) => {
   const handleAddWorker = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/worker`, 
-        { ...newWorker, skills: newWorker.skills.split(',').map(s=>s.trim()) }, {
+      await axios.post(`http://127.0.0.1:5001/api/auth/register-worker`, { ...newWorker, skills: newWorker.skills.split(',').map(s=>s.trim()) }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Worker registered successfully');
@@ -158,7 +186,7 @@ const AdminDashboard = ({ filterStatus }) => {
   const handleSendAnnouncement = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/announcements/broadcast`, announcement, {
+      await axios.post(`http://127.0.0.1:5001/api/announcements`, announcement, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Announcement broadcasted successfully');
@@ -178,33 +206,8 @@ const AdminDashboard = ({ filterStatus }) => {
     } catch (error) { toast.error('Failed to update stats'); }
   };
 
-  const generatePDF = async () => {
-    const input = document.getElementById('report-content');
-    if (!input) return;
-    try {
-      toast.info('Generating PDF Report...', { autoClose: 1000 });
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.body.classList.contains('dark-theme');
-      const canvas = await html2canvas(input, { 
-        scale: 4, 
-        useCORS: true,
-        backgroundColor: isDark ? '#0f172a' : '#f8fafc' 
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.setFontSize(18);
-      pdf.text('Hostel Problem Detection & Notification System', 10, 10);
-      pdf.setFontSize(12);
-      pdf.text(`Official Executive Report - generated on ${new Date().toLocaleDateString()}`, 10, 18);
-      
-      pdf.addImage(imgData, 'PNG', 0, 25, pdfWidth, pdfHeight);
-      pdf.save(`Hostel_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('PDF Downloaded successfully!');
-    } catch (err) {
-      toast.error('Failed to generate PDF');
-    }
+  const generatePDF = () => {
+    window.print();
   };
 
   const cardStats = {
@@ -301,7 +304,15 @@ const AdminDashboard = ({ filterStatus }) => {
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.studentId?.email || ''}</div>
                         </td>
                         <td style={{ padding: '0.75rem' }}>
-                          <span style={{ background: 'var(--primary-light)', color: 'var(--primary-dark)', padding: '0.2rem 0.65rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}>
+                          <span style={{ 
+                            background: 'var(--bg-secondary)', 
+                            color: 'var(--text-main)', 
+                            padding: '0.2rem 0.65rem', 
+                            borderRadius: '9999px', 
+                            fontWeight: 700, 
+                            fontSize: '0.8rem',
+                            border: '1px solid var(--border)'
+                          }}>
                             {c.roomNumber || 'N/A'}
                           </span>
                         </td>
@@ -457,46 +468,55 @@ const AdminDashboard = ({ filterStatus }) => {
         </div>
       ) : (
       <div id="report-content" style={{ padding: '10px' }}>
-        <div className="grid-stats" style={{ marginBottom: '2rem' }}>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #4F46E5', background: 'white' }}>
+        <div className="grid-stats" style={{ marginBottom: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+          <div className="card hover-lift" style={{ padding: '1.25rem', borderLeft: '4px solid #4F46E5' }}>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Total Complaints</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#4F46E5' }}>{cardStats.total}</div>
           </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F59E0B', background: 'white' }}>
+          <div className="card hover-lift" style={{ padding: '1.25rem', borderLeft: '4px solid #F59E0B' }}>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Pending Actions</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F59E0B' }}>{cardStats.pending}</div>
           </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #06B6D4', background: 'white' }}>
+          <div className="card hover-lift" style={{ padding: '1.25rem', borderLeft: '4px solid #06B6D4' }}>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>In Progress</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#06B6D4' }}>{cardStats.assigned}</div>
           </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #F472B6', background: 'white' }}>
+          <div className="card hover-lift" style={{ padding: '1.25rem', borderLeft: '4px solid #F472B6' }}>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Needs Verification</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#F472B6' }}>{cardStats.needsVerification}</div>
           </div>
-          <div className="card" style={{ padding: '1.25rem', borderLeft: '4px solid #10B981', background: 'white' }}>
+          <div className="card hover-lift" style={{ padding: '1.25rem', borderLeft: '4px solid #10B981' }}>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>Closed / Resolved</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10B981' }}>{cardStats.resolved}</div>
           </div>
         </div>
 
-        <div className="grid-responsive" style={{ marginBottom: '2rem' }}>
+        <div className="grid-analytics" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
           {/* Complaint Analytics */}
-          <div className="card">
+          <div className="card hover-lift">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
               <PieChartIcon size={24} color="var(--primary)" /> Complaint Analytics
             </div>
-            <div style={{ width: '100%', height: 300 }}>
+            <div style={{ width: '100%', height: 320 }}>
               {complaints.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={categoryData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                    <Pie 
+                      data={categoryData} 
+                      cx="50%" 
+                      cy="50%" 
+                      outerRadius={100} 
+                      fill="#8884d8" 
+                      dataKey="value" 
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={{ stroke: 'var(--text-muted)' }}
+                    >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <RechartsTooltip />
-                    <Legend />
+                    <RechartsTooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                    <Legend wrapperStyle={{ paddingTop: '20px', color: 'var(--text-main)' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -506,7 +526,7 @@ const AdminDashboard = ({ filterStatus }) => {
           </div>
 
           {/* Menu Ratings Analytics */}
-          <div className="card">
+          <div className="card hover-lift">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, fontSize: '1.1rem' }}>
                 <BarChart3 size={24} color="var(--secondary)" /> Menu Satisfaction
@@ -519,19 +539,19 @@ const AdminDashboard = ({ filterStatus }) => {
                 Reports &rarr;
               </button>
             </div>
-            <div style={{ width: '100%', height: 300 }}>
+            <div style={{ width: '100%', height: 320 }}>
               {menuRatings.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={menuRatings} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} />
                     <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{fill: 'var(--text-muted)', fontSize: 10}} unit="%" />
-                    <RechartsTooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
-                    <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={25} />
+                    <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{borderRadius: '12px', background: 'var(--card-bg)', backdropFilter: 'blur(10px)', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)'}} />
+                    <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={35} />
                     <defs>
                       <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#9B5DE5" />
-                        <stop offset="100%" stopColor="#F15BB5" />
+                        <stop offset="0%" stopColor="#B08401" />
+                        <stop offset="100%" stopColor="#D49E8D" />
                       </linearGradient>
                     </defs>
                   </BarChart>
@@ -582,7 +602,15 @@ const AdminDashboard = ({ filterStatus }) => {
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.studentId?.email || ''}</div>
                     </td>
                     <td style={{ padding: '0.75rem' }}>
-                      <span style={{ background: 'var(--primary-light)', color: 'var(--primary-dark)', padding: '0.2rem 0.65rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}>
+                      <span style={{ 
+                        background: 'var(--bg-secondary)', 
+                        color: 'var(--text-main)', 
+                        padding: '0.2rem 0.65rem', 
+                        borderRadius: '9999px', 
+                        fontWeight: 700, 
+                        fontSize: '0.8rem',
+                        border: '1px solid var(--border)'
+                      }}>
                         {c.roomNumber || 'N/A'}
                       </span>
                     </td>
@@ -648,9 +676,38 @@ const AdminDashboard = ({ filterStatus }) => {
                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Assigned to {c.assignedWorkerId?.name}</span>
                              <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleAdminAction(c._id, 'Resolve')}>✅ Finalize Resolution</button>
                              <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fecaca', color: '#991b1b', border: 'none' }} onClick={() => handleAdminAction(c._id, 'Reassign')}>❌ Reassign to Worker</button>
+                             {c.imageUrl && (
+                               <img 
+                                   src={getFullImageUrl(c.imageUrl)} 
+                                   alt="Issue" 
+                                   className="complaint-photo"
+                                   style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '0.5rem', marginTop: '0.5rem' }}
+                                   onError={(e) => {
+                                       e.target.src = 'https://placehold.co/600x400?text=Photo+Not+Available';
+                                   }}
+                               />
+                             )}
                           </>
                         )}
-                        <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171', marginTop: 'auto' }} onClick={() => handleAdminDelete(c._id)}>🗑️ Delete</button>
+                        <button 
+                          className="btn" 
+                          style={{ 
+                            padding: '0.25rem 0.5rem', 
+                            fontSize: '0.75rem', 
+                            backgroundColor: confirmingId === c._id ? '#ef4444' : '#fee2e2', 
+                            color: confirmingId === c._id ? 'white' : '#ef4444', 
+                            border: confirmingId === c._id ? 'none' : '1px solid #f87171', 
+                            marginTop: 'auto',
+                            transition: 'all 0.2s ease'
+                          }} 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleAdminDelete(c._id);
+                          }}
+                        >
+                          {confirmingId === c._id ? '⚠️ Confirm Delete?' : '🗑️ Delete'}
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -660,66 +717,79 @@ const AdminDashboard = ({ filterStatus }) => {
           </div>
         </div>
 
-        <div className="grid-responsive">
-          {/* Update Menu Widget */}
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-              <Calendar size={24} color="var(--primary)" /> Update Daily Menu
+        {/* Centered Administration Row */}
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '4rem', marginTop: '4rem' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', 
+            gap: '2.5rem', 
+            maxWidth: '1200px',
+            width: '100%',
+            justifyContent: 'center'
+          }}>
+            {/* Update Menu Widget */}
+            <div className="card hover-lift" style={{ height: 'fit-content' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+                <Calendar size={24} color="var(--primary)" /> Update Daily Menu
+              </div>
+              <form onSubmit={handleMenuSubmit}>
+                <div className="form-group">
+                  <label className="form-label">Date</label>
+                  <input type="date" className="form-input" value={menuDate} onChange={(e) => setMenuDate(e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Breakfast</label>
+                  <input type="text" className="form-input" value={menu.breakfast} onChange={(e) => setMenu({...menu, breakfast: e.target.value})} required />
+                </div>
+                <div className="grid-responsive" style={{ gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
+                  <div className="form-group">
+                    <label className="form-label">Lunch</label>
+                    <input type="text" className="form-input" value={menu.lunch} onChange={(e) => setMenu({...menu, lunch: e.target.value})} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Snacks</label>
+                    <input type="text" className="form-input" value={menu.snacks} onChange={(e) => setMenu({...menu, snacks: e.target.value})} required />
+                  </div>
+                </div>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                  <label className="form-label">Dinner</label>
+                  <input type="text" className="form-input" value={menu.dinner} onChange={(e) => setMenu({...menu, dinner: e.target.value})} required />
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Menu</button>
+              </form>
             </div>
-            <form onSubmit={handleMenuSubmit}>
-              <div className="form-group">
-                <label className="form-label">Date</label>
-                <input type="date" className="form-input" value={menuDate} onChange={(e) => setMenuDate(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Breakfast</label>
-                <input type="text" className="form-input" value={menu.breakfast} onChange={(e) => setMenu({...menu, breakfast: e.target.value})} required />
-              </div>
-              <div className="grid-responsive" style={{ gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Lunch</label>
-                  <input type="text" className="form-input" value={menu.lunch} onChange={(e) => setMenu({...menu, lunch: e.target.value})} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Snacks</label>
-                  <input type="text" className="form-input" value={menu.snacks} onChange={(e) => setMenu({...menu, snacks: e.target.value})} required />
-                </div>
-              </div>
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label className="form-label">Dinner</label>
-                <input type="text" className="form-input" value={menu.dinner} onChange={(e) => setMenu({...menu, dinner: e.target.value})} required />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Menu</button>
-            </form>
-          </div>
 
-          {/* Register Worker Widget */}
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
-              <UserPlus size={24} color="var(--primary)" /> Register New Worker
+            {/* Register Worker Widget */}
+            <div className="card hover-lift" style={{ height: 'fit-content' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
+                <UserPlus size={24} color="var(--primary)" /> Register Worker
+              </div>
+              <form onSubmit={handleAddWorker} autoComplete="off">
+                <div className="form-group">
+                  <label className="form-label">Name</label>
+                  <input type="text" className="form-input" value={newWorker.name} onChange={e=>setNewWorker({...newWorker, name: e.target.value})} required autoComplete="new-password" />
+                </div>
+                <div className="grid-responsive" style={{ gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
+                  <div className="form-group">
+                    <label className="form-label">Email</label>
+                    <input type="email" className="form-input" value={newWorker.email} onChange={e=>setNewWorker({...newWorker, email: e.target.value})} required autoComplete="new-password" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Password</label>
+                    <input type="password" className="form-input" value={newWorker.password} onChange={e=>setNewWorker({...newWorker, password: e.target.value})} required minLength={6} autoComplete="new-password" />
+                  </div>
+                </div>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                  <label className="form-label">Skills (comma separated)</label>
+                  <input type="text" className="form-input" value={newWorker.skills} onChange={e=>setNewWorker({...newWorker, skills: e.target.value})} required autoComplete="new-password" />
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register Worker</button>
+              </form>
             </div>
-            <form onSubmit={handleAddWorker} autoComplete="off">
-              <div className="form-group">
-                <label className="form-label">Name</label>
-                <input type="text" className="form-input" value={newWorker.name} onChange={e=>setNewWorker({...newWorker, name: e.target.value})} required autoComplete="new-password" />
-              </div>
-              <div className="grid-responsive" style={{ gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <input type="email" className="form-input" value={newWorker.email} onChange={e=>setNewWorker({...newWorker, email: e.target.value})} required autoComplete="new-password" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <input type="password" className="form-input" value={newWorker.password} onChange={e=>setNewWorker({...newWorker, password: e.target.value})} required minLength={6} autoComplete="new-password" />
-                </div>
-              </div>
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label className="form-label">Skills (comma separated)</label>
-                <input type="text" className="form-input" value={newWorker.skills} onChange={e=>setNewWorker({...newWorker, skills: e.target.value})} required autoComplete="new-password" />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Register Worker</button>
-            </form>
           </div>
+        </div>
+
+        <div className="grid-responsive" style={{ gap: '2.5rem', marginBottom: '4rem' }}>
 
           {/* Update Hostel Occupancy Stats Widget */}
           <div className="card" style={{ gridColumn: '1 / -1' }}>
@@ -767,7 +837,7 @@ const AdminDashboard = ({ filterStatus }) => {
         </div>
 
         {/* Send Announcement Widget */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
+        <div className="card hover-lift" style={{ gridColumn: '1 / -1', marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontWeight: 600, fontSize: '1.25rem' }}>
             <Bell size={24} color="var(--primary)" /> Send Announcement
           </div>
@@ -795,10 +865,11 @@ const AdminDashboard = ({ filterStatus }) => {
           </form>
         </div>
 
-      </div>
-      )}
-      </div>  {/* closes outer ternary wrapper div */}
     </div>
+    )}
+  </div>
+  )}
+</div>
   );
 };
 

@@ -59,20 +59,20 @@ const Sidebar = ({ role }) => {
   const links = getLinks();
 
   return (
-    <div className="sidebar">
+    <div className="sidebar glass" style={{ background: 'var(--gradient-sidebar)', backdropFilter: 'blur(20px)', opacity: 0.95 }}>
       {/* Profile Section */}
       <div className="profile-section" style={{ padding: '2.5rem 1.8rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
         <div style={{
           width: '64px', height: '64px', borderRadius: '22px',
-          background: 'linear-gradient(45deg, #9B5DE5, #F15BB5)',
+          background: 'var(--gradient-btn)',
           padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
         }}>
           <div style={{
             width: '100%', height: '100%', borderRadius: '18px',
-            background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            background: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <User size={30} color="white" />
+            <User size={30} color="var(--bg-main)" />
           </div>
         </div>
         <div>

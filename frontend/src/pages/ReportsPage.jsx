@@ -32,27 +32,31 @@ const ReportsPage = () => {
     const lowRated = reportData.filter(d => d.avgStars < 3).sort((a,b) => a.avgStars - b.avgStars);
     const highRated = reportData.filter(d => d.avgStars >= 3).sort((a,b) => b.avgStars - a.avgStars);
 
+    const handlePrint = () => {
+        window.print();
+    };
+
     const downloadPDF = async () => {
-        const input = document.getElementById('report-to-download');
-        if (!input) return;
+        // High-Fi PDF (Attempting again with absolute basics)
         try {
-            toast.info('Preparing PDF...', { autoClose: 1000 });
-            const canvas = await html2canvas(input, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL('image/png');
+            toast.info('Synthesizing PDF document...', { autoClose: 1000 });
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            
-            pdf.setFontSize(20);
-            pdf.text('Hostel Food Quality Report', 105, 15, { align: 'center' });
+            pdf.setFontSize(18);
+            pdf.text('Hostel Food Quality Report', 15, 20);
             pdf.setFontSize(10);
-            pdf.text(`Generated on: ${new Date().toLocaleString()}`, 105, 22, { align: 'center' });
+            pdf.text(`Official Document - ${new Date().toLocaleDateString()}`, 15, 28);
             
-            pdf.addImage(imgData, 'PNG', 0, 30, pdfWidth, pdfHeight);
-            pdf.save(`Food_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-            toast.success('Report downloaded!');
-        } catch (err) {
-            toast.error('Failed to generate PDF');
+            // Just draw the table text for now to ensure small size & successful name
+            let y = 40;
+            reportData.forEach(item => {
+                pdf.text(`${item.dish} - ${item.avgStars} Stars`, 15, y);
+                y += 10;
+            });
+
+            pdf.save('FoodData.pdf');
+            toast.success('Fast PDF generated!');
+        } catch (e) {
+            toast.error('Fast PDF failed, please use Print');
         }
     };
 
@@ -65,8 +69,8 @@ const ReportsPage = () => {
                     <h1 className="page-title">Weekly Food Reports</h1>
                     <p className="text-muted">Summary of student feedback for the current week.</p>
                 </div>
-                <button onClick={downloadPDF} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.6rem 1rem', fontSize: '0.8rem' }}>
-                    <Download size={18} /> <span className="hide-mobile">Download Report PDF</span><span className="show-mobile">Download PDF</span>
+                <button onClick={handlePrint} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.6rem 1rem', fontSize: '0.8rem' }}>
+                    <Download size={18} /> <span className="hide-mobile">Save Report as PDF (Print)</span><span className="show-mobile">Save PDF</span>
                 </button>
             </header>
 

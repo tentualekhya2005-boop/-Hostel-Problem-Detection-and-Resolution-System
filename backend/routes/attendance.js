@@ -60,20 +60,20 @@ const getIST = () => {
 // @access  Student
 router.post('/mark', protect, async (req, res) => {
     try {
-        const { lat, lon } = req.body;
+        const { lat, lon, deviceSignature } = req.body;
         const ist = getIST();
-        
-        // 1. Time Check (6:00 PM to 9:30 PM)
-        const timeValue = ist.hour * 60 + ist.minute;
-        const startWindow = 18 * 60; // 18:00 (6:00 PM)
-        const endWindow = 21 * 60 + 30; // 21:30 (9:30 PM)
 
-        if (timeValue < startWindow || timeValue > endWindow) {
+        // 0. Biometric/Hardware Lock Check
+        const user = await User.findById(req.user._id);
+        if (user.biometricRegistered && user.biometricKey !== deviceSignature) {
             return res.status(403).json({ 
-                message: `Attendance window closed. It is currently ${ist.hour}:${ist.minute.toString().padStart(2, '0')} IST. Open between 6:00 PM and 9:30 PM only.` 
+                message: 'Security Alert: This device is not authorized for this account. You must use your registered device to mark attendance.' 
             });
         }
-
+        
+        // 1. Time Check (REMOVED: Allowed all day)
+        // Window check bypassed as per user request.
+        
         // 2. Geofence Check
         if (!lat || !lon) {
             return res.status(400).json({ message: 'GPS location required for attendance' });

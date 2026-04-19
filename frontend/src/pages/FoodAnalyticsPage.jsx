@@ -63,33 +63,45 @@ const FoodAnalyticsPage = () => {
                 </div>
 
                 {/* Top Rated Summary */}
-                <div className="card" style={{ borderLeft: '5px solid #10B981' }}>
+                <div className="card" style={{ borderLeft: '5px solid #10B981', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#059669', fontWeight: 700, marginBottom: '1rem' }}>
                         <TrendingUp size={20} /> High Rated Items
                     </div>
                     {topRated.length > 0 ? (
-                        topRated.slice(0, 3).map((item, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
-                                <span>{item.dish}</span>
-                                <strong style={{ color: '#10B981' }}>{item.satisfaction}%</strong>
-                            </div>
-                        ))
-                    ) : <p className="text-muted">No top rated items yet.</p>}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {topRated.slice(0, 3).map((item, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
+                                    <span>{item.dish}</span>
+                                    <strong style={{ color: '#10B981' }}>{item.satisfaction}%</strong>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <p className="text-muted" style={{ textAlign: 'center', margin: 0 }}>No top rated items yet.</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Low Rated Summary */}
-                <div className="card" style={{ borderLeft: '5px solid #EF4444' }}>
+                <div className="card" style={{ borderLeft: '5px solid #EF4444', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#DC2626', fontWeight: 700, marginBottom: '1rem' }}>
                         <TrendingDown size={20} /> Focus Needed (Low Rated)
                     </div>
                     {lowRated.length > 0 ? (
-                        lowRated.slice(0, 3).map((item, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
-                                <span>{item.dish}</span>
-                                <strong style={{ color: '#EF4444' }}>{item.satisfaction}%</strong>
-                            </div>
-                        ))
-                    ) : <p className="text-muted">All items are rated above 50%!</p>}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {lowRated.slice(0, 3).map((item, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
+                                    <span>{item.dish}</span>
+                                    <strong style={{ color: '#EF4444' }}>{item.satisfaction}%</strong>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <p className="text-muted" style={{ textAlign: 'center', margin: 0 }}>All items are rated above 50%!</p>
+                        </div>
+                    )}
                 </div>
             </div>
 

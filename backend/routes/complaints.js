@@ -40,22 +40,34 @@ const upload = multer({
     }
 });
 
+// Helper: Sanitize filenames for Windows and URL compatibility
+function sanitizeFilename(name) {
+    if (!name) return 'file';
+    return name
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/[^a-z0-9\.\-]/g, '') // Remove non-alphanumeric except dots and hyphens
+        .replace(/\-+/g, '-') // Collapse multiple hyphens
+        .replace(/^-+|-+$/g, ''); // Trim hyphens from ends
+}
+
 // Helper: get URL from uploaded file (works for both Cloudinary and memory storage)
 function getImageUrl(file) {
     if (!file) return null;
     // Cloudinary attaches .path or .secure_url
-    if (file.path) return file.path; // Cloudinary returns the URL in file.path with multer-storage-cloudinary
-    // Memory storage: no URL (we'll save to local disk as fallback)
+    if (file.path) return file.path; 
+    // Memory storage: save to local disk as fallback
     if (file.buffer) {
         try {
             const uploadsDir = path.join(__dirname, '../uploads');
             if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-            const filename = `${Date.now()}-${file.originalname}`;
+            const sanitizedOriginal = sanitizeFilename(file.originalname);
+            const filename = `${Date.now()}-${sanitizedOriginal}`;
             fs.writeFileSync(path.join(uploadsDir, filename), file.buffer);
             return `/uploads/${filename}`;
         } catch (e) {
             console.error('Local file write failed:', e.message);
-            return null; // Graceful degradation — complaint saves without image
+            return null;
         }
     }
     return null;
@@ -519,15 +531,19 @@ router.delete('/worker/:id', protect, worker, async (req, res) => {
 // @access  Admin
 router.delete('/admin/:id', protect, admin, async (req, res) => {
     try {
+        console.log(`[Admin] Delete attempt: ID=${req.params.id} by Admin=${req.user.email}`);
         const complaint = await Complaint.findById(req.params.id);
-
+        
         if (complaint) {
-            await complaint.deleteOne();
+            await Complaint.findByIdAndDelete(req.params.id);
+            console.log(`[Admin] Delete success: ID=${req.params.id}`);
             res.json({ message: 'Complaint permanently deleted' });
         } else {
+            console.log(`[Admin] Delete fail: ID=${req.params.id} not found`);
             res.status(404).json({ message: 'Complaint not found' });
         }
     } catch (error) {
+        console.error(`[Admin] Delete error:`, error.message);
         res.status(500).json({ message: error.message });
     }
 });

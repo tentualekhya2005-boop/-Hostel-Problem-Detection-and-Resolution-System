@@ -93,12 +93,22 @@ const MenuFeedbackPage = () => {
                             <Clock size={18} color="var(--text-muted)" />
                         </div>
                         
-                        <div className="grid-responsive" style={{ padding: '1.5rem' }}>
+                        <div className="grid-responsive" style={{ padding: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
                             {['breakfast', 'lunch', 'snacks', 'dinner'].map(meal => (
-                                <div key={meal} style={{ padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                                    <div style={{ color: 'var(--primary)', fontWeight: 800, marginBottom: '1rem', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em' }}>{meal}</div>
+                                <div key={meal} className="hover-lift" style={{ 
+                                    padding: '1.5rem', 
+                                    background: 'var(--bg-secondary)', 
+                                    borderRadius: '20px', 
+                                    border: '1px solid var(--border)', 
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}>
+                                    <div style={{ color: 'var(--primary)', fontWeight: 800, marginBottom: '1.25rem', textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Utensils size={14} /> {meal}
+                                    </div>
                                     
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                         {(day.menu[meal] || '').split(',').map((item, itemIdx, arr) => {
                                             const itemName = item.trim();
                                             if (!itemName) return null;
@@ -108,16 +118,16 @@ const MenuFeedbackPage = () => {
                                             const currentRating = itemRatingObj ? itemRatingObj.rating : (day.ratings?.[meal] || 0);
 
                                             return (
-                                                <div key={itemIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem 0', borderBottom: itemIdx < arr.length - 1 ? '1px dashed #e2e8f0' : 'none' }}>
-                                                    <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-main)' }}>{itemName}</span>
-                                                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                                                <div key={itemIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', padding: '0.5rem 0', borderBottom: itemIdx < arr.length - 1 ? '1px dashed var(--border)' : 'none' }}>
+                                                    <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)', opacity: 0.9 }}>{itemName}</span>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                         {[1,2,3,4,5].map(star => (
                                                             <Star 
                                                                 key={star} 
                                                                 size={20} 
                                                                 style={{ cursor: 'pointer', transition: 'transform 0.1s' }}
-                                                                fill={star <= currentRating ? '#FFD700' : 'transparent'}
-                                                                stroke={star <= currentRating ? '#FFD700' : '#cbd5e1'}
+                                                                fill={star <= currentRating ? 'var(--primary)' : 'transparent'}
+                                                                stroke={star <= currentRating ? 'var(--primary)' : 'var(--text-muted)'}
                                                                 onClick={() => handleRate(day.date, meal, star, itemName)}
                                                             />
                                                         ))}

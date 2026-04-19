@@ -8,6 +8,7 @@ const StudentAnnouncementsPage = () => {
   const { user } = useContext(AuthContext);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmingId, setConfirmingId] = useState(null);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -27,15 +28,23 @@ const StudentAnnouncementsPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Mark as read/delete from view?")) return;
+    if (!id) return;
+    if (confirmingId !== id) {
+      setConfirmingId(id);
+      setTimeout(() => setConfirmingId(prev => prev === id ? null : prev), 3000);
+      return;
+    }
+
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/announcements/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      toast.success('Announcement removed from your view');
+      toast.success('Announcement removed');
       setAnnouncements(prev => prev.filter(a => a._id !== id));
+      setConfirmingId(null);
     } catch (error) {
       toast.error('Failed to remove announcement');
+      setConfirmingId(null);
     }
   };
 
@@ -57,14 +66,10 @@ const StudentAnnouncementsPage = () => {
           <p className="text-muted">We'll notify you when there's an update from the office.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="grid-responsive" style={{ gap: '1.5rem' }}>
           {announcements.map((ann, idx) => (
-            <div key={ann._id || idx} className="card" style={{ 
-              padding: '1.5rem', 
-              borderLeft: '5px solid var(--primary)',
-              background: 'linear-gradient(to right, #FAF6FF, #FFFFFF)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+            <div key={ann._id || idx} className="card" style={{ padding: '1.5rem', borderLeft: '5px solid var(--primary)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Calendar size={16} color="var(--primary)" />
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
@@ -73,12 +78,23 @@ const StudentAnnouncementsPage = () => {
                 </div>
                 <button 
                   onClick={() => handleDelete(ann._id)}
-                  style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.6, padding: '4px' }}
-                  onMouseOver={e => e.currentTarget.style.opacity = '1'}
-                  onMouseOut={e => e.currentTarget.style.opacity = '0.6'}
+                  style={{ 
+                    background: confirmingId === ann._id ? '#ef4444' : 'rgba(239, 68, 68, 0.1)', 
+                    border: 'none', 
+                    color: confirmingId === ann._id ? 'white' : '#ef4444', 
+                    cursor: 'pointer', 
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                    transition: 'all 0.2s ease'
+                  }}
                   title="Remove from view"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={14} /> {confirmingId === ann._id ? 'Confirm?' : 'Delete'}
                 </button>
               </div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>{ann.title}</h2>

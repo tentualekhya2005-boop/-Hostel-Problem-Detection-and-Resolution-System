@@ -41,10 +41,15 @@ router.post('/', protect, admin, async (req, res) => {
 // Let's protect it so only logged in users see it
 router.get('/today', protect, async (req, res) => {
     try {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
+        // Use local date string instead of UTC to ensure "Today" matches user expectation
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
         
-        const endOfDay = new Date();
+        const startOfDay = new Date(todayStr);
+        const endOfDay = new Date(todayStr);
         endOfDay.setHours(23, 59, 59, 999);
 
         const menu = await Menu.findOne({

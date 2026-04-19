@@ -82,4 +82,39 @@ router.put('/favorites', protect, async (req, res) => {
     }
 });
 
+// @route   GET /api/users/profile
+// @desc    Get user profile (Alias for /me)
+// @access  Private
+router.get('/profile', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @route   POST /api/users/biometric/register
+// @desc    Register biometric key and hardware fingerprint for the user
+// @access  Private
+router.post('/biometric/register', protect, async (req, res) => {
+    try {
+        const { deviceSignature } = req.body;
+        console.log(`[BIOMETRIC] Enrollment request for user: ${req.user.email} | Sig: ${deviceSignature}`);
+        
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        user.biometricRegistered = true;
+        user.biometricKey = deviceSignature; // Lock account to this specific hardware signature
+        await user.save();
+        
+        console.log(`[BIOMETRIC] Successfully enrolled: ${req.user.email}`);
+        res.json({ message: 'Device authorization successful', biometricRegistered: true });
+    } catch (error) {
+        console.error('[BIOMETRIC_ERROR]', error.message);
+        res.status(500).json({ message: 'Registration failed: ' + error.message });
+    }
+});
+
 module.exports = router;

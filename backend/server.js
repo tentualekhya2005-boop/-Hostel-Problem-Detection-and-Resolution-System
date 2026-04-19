@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 
 // Load env vars
 dotenv.config();
@@ -36,14 +37,43 @@ app.use(cors({
 
 app.use(express.json());
 
-const fs = require('fs');
-// Create uploads directory if it doesn't exist (needed for cloud deployment)
+// Robust Static File Serving
 const uploadsPath = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsPath)) {
     fs.mkdirSync(uploadsPath, { recursive: true });
 }
 
-app.use('/uploads', express.static(uploadsPath));
+// Serve static files with permissive headers
+app.use('/uploads', express.static(uploadsPath, {
+    setHeaders: (res, path) => {
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+    }
+}));
+
+// DIAGNOSTIC: Specific 404 for uploads to help users debug pathing
+app.use('/uploads', (req, res) => {
+    const fullPath = path.join(uploadsPath, req.url);
+    console.warn(`[UPLOAD_404] Request: ${req.url} | Expected on disk: ${fullPath} | Exists: ${fs.existsSync(fullPath)}`);
+    res.status(404).json({ 
+        message: 'Media not found', 
+        pathOnServer: fullPath,
+        exists: fs.existsSync(fullPath)
+    });
+});
+
+// Diagnostic route for path verification
+app.get('/api/debug-path', (req, res) => {
+    res.json({ 
+        cwd: process.cwd(),
+        __dirname,
+        uploadsPath,
+        exists: fs.existsSync(uploadsPath),
+        contents: fs.existsSync(uploadsPath) ? fs.readdirSync(uploadsPath).slice(0, 10) : []
+    });
+});
+
+console.log('Serving uploads from:', uploadsPath);
 
 // ─── DATABASE ─────────────────────────────────────────────────────────────────
 const connectDB = async () => {

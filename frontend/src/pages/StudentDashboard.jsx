@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3, Star, Grid } from 'lucide-react';
+import { AlertCircle, Calendar, PlusCircle, Megaphone, BarChart3, Star, Grid, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const StudentDashboard = ({ filterStatus }) => {
@@ -14,6 +14,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const [stats, setStats] = useState(null);
   const [userFavorites, setUserFavorites] = useState([]);
   const [myRatings, setMyRatings] = useState({});
+  const [confirmingId, setConfirmingId] = useState(null);
   
   // New Complaint Form State
   const [title, setTitle] = useState('');
@@ -23,14 +24,22 @@ const StudentDashboard = ({ filterStatus }) => {
   const [block, setBlock] = useState('Nagavalli');
   const [floor, setFloor] = useState('');
   const [image, setImage] = useState(null);
+  const [roomNumber, setRoomNumber] = useState(user.roomNumber || '');
   const [submitting, setSubmitting] = useState(false);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
     const trimmed = url.trim();
     if (trimmed.toLowerCase().startsWith('http')) return trimmed;
-    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/['"]/g, '').replace(/\/$/, '');
-    return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
+    const baseUrl = 'http://127.0.0.1:5001';
+    
+    // Encode components to handle spaces and parentheses safely
+    const parts = trimmed.split('/');
+    const filename = parts.pop();
+    const encodedFilename = encodeURIComponent(filename);
+    const path = [...parts, encodedFilename].join('/');
+    
+    return `${baseUrl}/${path.replace(/^\//, '')}`;
   };
 
   useEffect(() => {
@@ -45,7 +54,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const fetchMyTodayRating = async () => {
     const today = new Date().toISOString().split('T')[0];
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/my-rating/${today}`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/menu/my-rating/${today}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMyRatings(data);
@@ -55,7 +64,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const handleRate = async (meal, rating, itemName) => {
     const today = new Date().toISOString().split('T')[0];
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/rate`, { date: today, meal, rating, itemName }, {
+      await axios.post(`http://127.0.0.1:5001/api/menu/rate`, { date: today, meal, rating, itemName }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       
@@ -74,7 +83,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchAnnouncements = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/announcements`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/announcements`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setAnnouncements(data);
@@ -85,7 +94,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const handleDeleteAnnouncement = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/announcements/${id}`, {
+      await axios.delete(`http://127.0.0.1:5001/api/announcements/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Announcement deleted');
@@ -95,7 +104,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchTodayMenu = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/menu/today`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/menu/today`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setMenu(data);
@@ -107,7 +116,7 @@ const StudentDashboard = ({ filterStatus }) => {
   const toggleFavorite = async (item) => {
     if (!item) return;
     try {
-      const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/favorites`, { item }, {
+      const { data } = await axios.put(`http://127.0.0.1:5001/api/users/favorites`, { item }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setUserFavorites(data);
@@ -121,7 +130,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchUserFavorites = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/me`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/users/me`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setUserFavorites(data.favorites || []);
@@ -132,7 +141,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchStats = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/stats`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/stats`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setStats(data);
@@ -141,7 +150,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const fetchMyComplaints = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/student`, {
+      const { data } = await axios.get(`http://127.0.0.1:5001/api/complaints/student`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setComplaints(data);
@@ -152,7 +161,7 @@ const StudentDashboard = ({ filterStatus }) => {
 
   const handleVerify = async (id, isResolved) => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}/verify-resolution`, { isResolved }, {
+      await axios.put(`http://127.0.0.1:5001/api/complaints/${id}/verify-resolution`, { isResolved }, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success(isResolved ? 'Confirmed as resolved!' : 'Sent back to worker!');
@@ -161,15 +170,30 @@ const StudentDashboard = ({ filterStatus }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this complaint?")) return;
+    console.log("Student delete triggered for ID:", id);
+    if (!id) {
+      toast.error("Error: Complaint ID is missing");
+      return;
+    }
+
+    if (confirmingId !== id) {
+      setConfirmingId(id);
+      setTimeout(() => setConfirmingId(prev => prev === id ? null : prev), 3000);
+      return;
+    }
+
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/${id}`, {
+      console.log("Sending Student DELETE request...");
+      await axios.delete(`http://127.0.0.1:5001/api/complaints/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      toast.success('Complaint deleted successfully');
+      toast.success('Complaint deleted from your list');
+      setConfirmingId(null);
       fetchMyComplaints();
-    } catch (error) {
-      toast.error('Failed to delete complaint');
+    } catch (error) { 
+      console.error("Student delete error:", error);
+      toast.error('Failed to delete complaint'); 
+      setConfirmingId(null);
     }
   };
 
@@ -183,10 +207,11 @@ const StudentDashboard = ({ filterStatus }) => {
     formData.append('year', year);
     formData.append('block', block);
     formData.append('floor', floor);
+    formData.append('roomNumber', roomNumber);
     if (image) formData.append('image', image);
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints`, formData, {
+      await axios.post(`http://127.0.0.1:5001/api/complaints`, formData, {
         headers: { 
           Authorization: `Bearer ${user.token}`
         }
@@ -197,6 +222,7 @@ const StudentDashboard = ({ filterStatus }) => {
       setYear('1st Year');
       setBlock('Nagavalli');
       setFloor('');
+      setRoomNumber(user.roomNumber || '');
       setImage(null);
       fetchMyComplaints();
     } catch (error) {
@@ -230,19 +256,25 @@ const StudentDashboard = ({ filterStatus }) => {
       </header>
 
       {!filterStatus ? (
-        /* ─── RAISE COMPLAINT FORM (PRIMARY VIEW) ─── */
-        <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 700, fontSize: '1.2rem' }}>
-              <PlusCircle size={22} /> Tell us what's wrong
-            </div>
-            <form onSubmit={handleSubmit}>
+        <>
+        {/* ─── RAISE COMPLAINT FORM (PRIMARY VIEW) ─── */}
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', lgGridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '2rem', alignItems: 'start' }} className="responsive-form-grid">
+            <div className="card" style={{ order: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 700, fontSize: '1.2rem' }}>
+                <PlusCircle size={22} /> Tell us what's wrong
+              </div>
+              <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">{t('title')}</label>
                 <input type="text" className="form-input" placeholder="e.g. Fan not working" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
 
               <div className="grid-responsive" style={{ gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Room Number</label>
+                  <input type="text" className="form-input" placeholder="e.g. 101, B-12" value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} required />
+                </div>
                 <div className="form-group">
                   <label className="form-label">{t('category')}</label>
                   <select className="form-select" value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -307,14 +339,111 @@ const StudentDashboard = ({ filterStatus }) => {
               </button>
             </form>
           </div>
+          <div style={{ order: 2, display: 'flex', flexDirection: 'column', gap: '1rem' }} className="hide-tablet">
+            <div className="card" style={{ padding: '0', overflow: 'hidden', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+              <img src="/illustration.png" alt="Hostel Problem Illustration" style={{ width: '100%', height: 'auto', borderRadius: '1rem', filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.15))' }} />
+            </div>
+            <div className="card" style={{ background: 'var(--primary-light)', borderColor: 'var(--primary)', borderStyle: 'dashed' }}>
+              <div style={{ color: 'var(--primary-dark)', fontSize: '0.85rem', fontWeight: 600 }}>
+                <AlertCircle size={16} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+                Your report helps us maintain a better living environment for everyone.
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* ─── RECENT COMPLAINTS SECTION ─── */}
+      <div style={{ marginTop: '4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem', color: 'var(--text-main)', fontWeight: 800, fontSize: '1.5rem' }}>
+          <div style={{ width: '4px', height: '24px', background: 'var(--primary)', borderRadius: '2px' }}></div>
+          Recent Complaints
+        </div>
+
+        {complaints.length === 0 ? (
+          <div className="card" style={{ textAlign: 'center', padding: '4rem' }}>
+            <p className="text-muted">No complaints logged yet. Raise your first problem above!</p>
+          </div>
+        ) : (
+          <div className="grid-cards" style={{ gap: '2rem' }}>
+            {complaints.slice(0, 6).map((comp) => (
+              <div key={comp._id} className="card animate-fade-in hover-lift" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%', border: '1px solid var(--border)' }}>
+                <div style={{ padding: '1.5rem', flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-main)' }}>{comp.title}</div>
+                    <span className={`badge badge-${comp.status.toLowerCase().replace(/ /g, '-')}`} style={{ fontSize: '0.65rem' }}>{comp.status}</span>
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {comp.description}
+                  </p>
+                  
+                  {comp.imageUrl && (
+                    <div style={{ 
+                      position: 'relative', 
+                      borderRadius: '1rem', 
+                      overflow: 'hidden', 
+                      width: '100%',
+                      maxWidth: '240px', // Perfect square size
+                      aspectRatio: '1/1',
+                      margin: '0 auto 1.5rem auto', 
+                      border: '4px solid var(--bg-secondary)',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
+                    }}>
+                      <img 
+                        src={getFullImageUrl(comp.imageUrl)} 
+                        alt="Issue" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </div>
+                  )}
+
+                  {comp.status === 'Needs Verification' && (
+                    <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--primary-light)', borderRadius: '0.75rem', border: '1px solid var(--primary)' }}>
+                      <p style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--primary-dark)' }}>Is this problem fixed?</p>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-primary" style={{ padding: '0.4rem', flex: 1, fontSize: '0.75rem' }} onClick={() => handleVerify(comp._id, true)}>Verify</button>
+                        <button className="btn btn-secondary" style={{ padding: '0.4rem', flex: 1, fontSize: '0.75rem' }} onClick={() => handleVerify(comp._id, false)}>Reject</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
+                    <Calendar size={14} /> {new Date(comp.createdAt).toLocaleDateString()}
+                  </div>
+                  <button 
+                    className="btn" 
+                    style={{ 
+                      padding: '0.4rem 0.75rem', 
+                      fontSize: '0.72rem', 
+                      backgroundColor: confirmingId === comp._id ? '#ef4444' : 'transparent', 
+                      color: confirmingId === comp._id ? 'white' : '#ef4444', 
+                      border: confirmingId === comp._id ? 'none' : '1px solid #fecaca',
+                      fontWeight: 700
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(comp._id);
+                    }}
+                  >
+                    {confirmingId === comp._id ? 'Confirm?' : 'Delete'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      </>
       ) : (
-        /* ─── COMPLAINTS LIST (FILTERED VIEW) ─── */
-        <div className="card">
+        /* ─── VIEW COMPLAINTS TABLE (ALTERNATIVE VIEW) ─── */
+        <div className="card animate-fade-in">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem' }}>
             <AlertCircle size={22} color="var(--primary)" /> {filterStatus} History
           </div>
-          <div className="grid-responsive">
+          <div className="grid-cards">
             {complaints.filter(c => {
               if (filterStatus === 'Pending') return c.status === 'Pending';
               if (filterStatus === 'Assigned') return c.status === 'Assigned';
@@ -339,9 +468,18 @@ const StudentDashboard = ({ filterStatus }) => {
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{comp.description}</p>
                   
                   {comp.imageUrl && (
-                    <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ 
+                      marginBottom: '1.25rem', 
+                      width: '100%', 
+                      maxWidth: '180px', 
+                      aspectRatio: '1/1', 
+                      overflow: 'hidden', 
+                      borderRadius: '1rem', 
+                      border: '3px solid var(--border)',
+                      margin: '0 auto 1.25rem auto'
+                    }}>
                       <a href={getFullImageUrl(comp.imageUrl)} target="_blank" rel="noopener noreferrer">
-                        <img src={getFullImageUrl(comp.imageUrl)} alt="Issue" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '0.75rem', border: '2px solid var(--border)' }} />
+                        <img src={getFullImageUrl(comp.imageUrl)} alt="Issue" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </a>
                     </div>
                   )}
@@ -361,11 +499,24 @@ const StudentDashboard = ({ filterStatus }) => {
                        <Calendar size={14} /> {new Date(comp.createdAt).toLocaleDateString()}
                     </div>
                     <button 
-                      className="btn btn-secondary" 
-                      style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', color: '#ef4444', borderColor: '#fee2e2' }} 
-                      onClick={() => handleDelete(comp._id)}
+                      className="btn" 
+                      style={{ 
+                        padding: '0.25rem 0.5rem', 
+                        fontSize: '0.75rem', 
+                        backgroundColor: confirmingId === comp._id ? '#ef4444' : '#fee2e2', 
+                        color: confirmingId === comp._id ? 'white' : '#ef4444', 
+                        border: confirmingId === comp._id ? 'none' : '1px solid #f87171', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.25rem' 
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDelete(comp._id);
+                      }}
                     >
-                      Delete
+                      <Trash2 size={14} /> {confirmingId === comp._id ? '⚠️ Confirm?' : 'Delete'}
                     </button>
                   </div>
                 </div>

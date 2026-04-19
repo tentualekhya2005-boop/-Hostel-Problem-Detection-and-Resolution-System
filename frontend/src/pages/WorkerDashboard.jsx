@@ -8,13 +8,21 @@ const WorkerDashboard = ({ filterStatus }) => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [resolveImages, setResolveImages] = useState({});
+  const [confirmingId, setConfirmingId] = useState(null);
 
   const getFullImageUrl = (url) => {
     if (!url) return null;
     const trimmed = url.trim();
     if (trimmed.toLowerCase().startsWith('http')) return trimmed;
     const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/['"]/g, '').replace(/\/$/, '');
-    return `${baseUrl}/${trimmed.replace(/^\//, '')}`;
+    
+    // Encode components to handle spaces and parentheses safely
+    const parts = trimmed.split('/');
+    const filename = parts.pop();
+    const encodedFilename = encodeURIComponent(filename);
+    const path = [...parts, encodedFilename].join('/');
+    
+    return `${baseUrl}/${path.replace(/^\//, '')}`;
   };
 
   useEffect(() => {
@@ -57,14 +65,31 @@ const WorkerDashboard = ({ filterStatus }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to remove this solved task from your dashboard?")) return;
+    console.log("Worker delete triggered for ID:", id);
+    if (!id) {
+      toast.error("Error: Task ID is missing");
+      return;
+    }
+
+    if (confirmingId !== id) {
+      setConfirmingId(id);
+      setTimeout(() => setConfirmingId(prev => prev === id ? null : prev), 3000);
+      return;
+    }
+
     try {
+      console.log("Sending Worker DELETE request...");
       await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/complaints/worker/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.success('Task removed from dashboard');
+      setConfirmingId(null);
       fetchTasks();
-    } catch (error) { toast.error('Failed to remove task'); }
+    } catch (error) { 
+      console.error("Worker delete error:", error);
+      toast.error('Failed to remove task'); 
+      setConfirmingId(null);
+    }
   };
 
   return (
@@ -108,20 +133,20 @@ const WorkerDashboard = ({ filterStatus }) => {
                 {/* Location Details */}
                 <div style={{ 
                   display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '0.5rem', 
-                  backgroundColor: 'var(--primary-light)', borderRadius: '0.65rem',
+                  backgroundColor: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '0.65rem',
                   padding: '0.85rem', marginBottom: '1rem'
                 }}>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Room No.</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-dark)' }}>{task.roomNumber || 'N/A'}</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary)' }}>{task.roomNumber || 'N/A'}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Block</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--plum)' }}>{task.block || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>{task.block || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Year</div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--secondary-dark)' }}>{task.year || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{task.year || <span style={{ color: '#B0A0B5', fontStyle: 'italic', fontWeight: 400, fontSize: '0.8rem' }}>Not provided</span>}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>Floor</div>
@@ -170,11 +195,25 @@ const WorkerDashboard = ({ filterStatus }) => {
                 {task.status !== 'Assigned' && (
                   <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
                     <button 
-                      className="btn btn-secondary" 
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#ef4444', border: '1px solid #f87171', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                      onClick={() => handleDelete(task._id)}
+                      className="btn" 
+                      style={{ 
+                        padding: '0.25rem 0.5rem', 
+                        fontSize: '0.75rem', 
+                        backgroundColor: confirmingId === task._id ? '#ef4444' : '#fee2e2', 
+                        color: confirmingId === task._id ? 'white' : '#ef4444', 
+                        border: confirmingId === task._id ? 'none' : '1px solid #f87171', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.25rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDelete(task._id);
+                      }}
                     >
-                      <Trash2 size={14} /> Delete
+                      <Trash2 size={14} /> {confirmingId === task._id ? '⚠️ Confirm?' : 'Delete'}
                     </button>
                   </div>
                 )}
